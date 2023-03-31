@@ -5,3 +5,6 @@ export const NotImplementedControllerError = createHttpError(501, 'Controller no
 export const InvalidController = createHttpError(500, 'Invalid controller', { expose: false });
 export const InvalidHandler = createHttpError(500, 'Invalid controller handler', { expose: false });
 export const PathAlreadyExistError = createHttpError(500, 'Path already exist in router', { expose: false });
+export const NotFoundError = createHttpError(404, 'Not found', { expose: true });
+export const ServerError = createHttpError(500, 'Server error', { expose: true });
+export const isHttpError = (e: any) => e instanceof createHttpError.HttpError;

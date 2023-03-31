@@ -1,18 +1,18 @@
 import { faker } from '@faker-js/faker';
 import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { NotImplementedControllerError, NotImplementedHandler } from '../../errors/http';
+import { NotFoundError, NotImplementedControllerError, NotImplementedHandler } from '../../errors/http';
 import { createController } from '../../utils/controller';
-import AwsSamRouter, { HandlerType } from '../AwsSamRouter';
+import AwsProxyRouter, { HandlerType } from '../AwsProxyRouter';
 import RouterBase from '../RouterBase';
 
-describe('AwsSamRouter', () => {
+describe('AwsProxyRouter', () => {
   it('Should route succesfully', async () => {
     const controllerResult = { statusCode: 200, body: faker.datatype.string() };
-    const resource = '/resource/';
+    const path = '/resource/';
     const httpMethod = 'GET';
-    const router = new AwsSamRouter();
+    const router = new AwsProxyRouter();
     router.use(
-      resource,
+      path,
       createController<HandlerType>({
         get: async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
           return controllerResult;
@@ -22,18 +22,18 @@ describe('AwsSamRouter', () => {
 
     const handler = router.expose();
 
-    const response = await handler({ resource, httpMethod } as APIGatewayProxyEvent, {} as Context);
+    const response = await handler({ path, httpMethod } as APIGatewayProxyEvent, {} as Context);
 
     expect(response).toEqual(controllerResult);
   });
 
   it('Should route succesfully even if method is in lower case', async () => {
     const controllerResult = { statusCode: 200, body: faker.datatype.string() };
-    const resource = '/resource/';
+    const path = '/resource/';
     const httpMethod = 'get';
-    const router = new AwsSamRouter();
+    const router = new AwsProxyRouter();
     router.use(
-      resource,
+      path,
       createController<HandlerType>({
         get: async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
           return controllerResult;
@@ -43,7 +43,7 @@ describe('AwsSamRouter', () => {
 
     const handler = router.expose();
 
-    const response = await handler({ resource, httpMethod } as APIGatewayProxyEvent, {} as Context);
+    const response = await handler({ path, httpMethod } as APIGatewayProxyEvent, {} as Context);
 
     expect(response).toEqual(controllerResult);
   });
@@ -52,7 +52,7 @@ describe('AwsSamRouter', () => {
     const getResult = { statusCode: 200, body: faker.datatype.string() };
     const postResult = { statusCode: 200, body: faker.datatype.string() };
 
-    const router = new AwsSamRouter();
+    const router = new AwsProxyRouter();
 
     router.use(
       '/res1/',
@@ -74,10 +74,10 @@ describe('AwsSamRouter', () => {
 
     const handler = router.expose();
 
-    const response = await handler({ resource: '/res1/', httpMethod: 'GET' } as APIGatewayProxyEvent, {} as Context);
+    const response = await handler({ path: '/res1/', httpMethod: 'GET' } as APIGatewayProxyEvent, {} as Context);
     expect(response).toEqual(getResult);
 
-    const response2 = await handler({ resource: '/res2/', httpMethod: 'POST' } as APIGatewayProxyEvent, {} as Context);
+    const response2 = await handler({ path: '/res2/', httpMethod: 'POST' } as APIGatewayProxyEvent, {} as Context);
     expect(response2).toEqual(postResult);
   });
 
@@ -87,7 +87,7 @@ describe('AwsSamRouter', () => {
       return getResult;
     };
 
-    const router = new AwsSamRouter();
+    const router = new AwsProxyRouter();
 
     router.use(
       '/resource/',
@@ -97,8 +97,10 @@ describe('AwsSamRouter', () => {
     );
 
     const handler = router.expose();
-    const result = await handler({ resource: '/res1/', httpMethod: 'GET' } as APIGatewayProxyEvent, {} as Context);
-    expect(result).toEqual(RouterBase.errorToHttpError(NotImplementedControllerError));
+
+    const result = await handler({ path: '/res1/', httpMethod: 'GET' } as APIGatewayProxyEvent, {} as Context);
+
+    expect(result).toEqual(RouterBase.errorToHttpError(NotFoundError));
   });
 
   it('Should return an error if handler does not exist', async () => {
@@ -107,7 +109,7 @@ describe('AwsSamRouter', () => {
       return getResult;
     };
 
-    const router = new AwsSamRouter();
+    const router = new AwsProxyRouter();
 
     router.use(
       '/resource/',
@@ -117,7 +119,8 @@ describe('AwsSamRouter', () => {
     );
 
     const handler = router.expose();
-    const result = await handler({ resource: '/resource/', httpMethod: 'POST' } as APIGatewayProxyEvent, {} as Context);
+    let error;
+    const result = await handler({ path: '/resource/', httpMethod: 'POST' } as APIGatewayProxyEvent, {} as Context);
     expect(result).toEqual(RouterBase.errorToHttpError(NotImplementedHandler));
   });
 });

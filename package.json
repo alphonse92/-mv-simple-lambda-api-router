@@ -35,7 +35,8 @@
     "publish:npm:patch": "npm run test:modules && npm version patch && npm publish"
   },
   "dependencies": {
-    "http-errors": "^2.0.0"
+    "http-errors": "^2.0.0",
+    "path-to-regexp": "^6.2.1"
   },
   "devDependencies": {
     "@faker-js/faker": "^7.6.0",

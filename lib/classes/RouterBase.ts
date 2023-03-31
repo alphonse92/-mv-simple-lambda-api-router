@@ -1,4 +1,4 @@
-import { NotImplementedControllerError, PathAlreadyExistError } from '../errors/http';
+import { NotImplementedControllerError, PathAlreadyExistError, ServerError, isHttpError } from '../errors/http';
 import { RouterMapType } from '../types/TRouter';
 import Controller from './Controller';
 
@@ -18,5 +18,16 @@ export default abstract class RouterBase<T, K> {
 
   expose(): T {
     throw NotImplementedControllerError;
+  }
+
+  static errorToHttpError(e) {
+    let error: any = ServerError;
+    if (isHttpError(e)) {
+      error = e;
+    }
+
+    const { statusCode, message } = error;
+
+    return { statusCode, body: message };
   }
 }
