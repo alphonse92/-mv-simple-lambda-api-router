@@ -1,6 +1,6 @@
 {
   "name": "simple-lambda-api-router",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "files": [
     "dist/*"
   ],
