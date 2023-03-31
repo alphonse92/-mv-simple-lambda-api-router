@@ -2,6 +2,11 @@
 
 Simple and lightweight lambda api router.
 
+# Example Projects:
+
+1. https://github.com/alphonse92/AwsProxyRouterExample
+2. https://github.com/alphonse92/AwsSamRouterExample
+
 # CommonJS
 
 ```javascript
