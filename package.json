@@ -17,6 +17,17 @@
     "publish:npm:patch": "npm run test:modules && npm version patch && npm publish"
   },
   "license": "ISC",
+  "keywords": [
+    "aws sam",
+    "aws",
+    "sam",
+    "api",
+    "router",
+    "api router",
+    "typescript",
+    "node",
+    "node js"
+  ],
   "dependencies": {
     "http-errors": "^2.0.0"
   },
