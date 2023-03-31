@@ -3,7 +3,7 @@
   "author": "Eliecer Alejandro Molina Vergel",
   "description": "Simple and lightweight lambda api router.",
   "license": "ISC",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "repository": {
     "type": "git",
     "url": "https://github.com/alphonse92/-mv-simple-lambda-api-router"
