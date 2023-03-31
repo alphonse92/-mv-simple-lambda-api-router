@@ -5,8 +5,8 @@ Simple and lightweight lambda api router.
 # CommonJS
 
 ```javascript
-const { createController } = require('./dist/utils/controller');
-const { AwsSamRouter } = require('./dist/classes');
+const { createController } = require('simple-lambda-api-router/dist/utils/controller');
+const { AwsSamRouter } = require('simple-lambda-api-router/dist/classes');
 
 // Use the SAM router
 const router = new AwsSamRouter();
@@ -32,8 +32,8 @@ export const lambdaHandler = router.expose();
 
 ```typescript
 import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import AwsSamRouter, { HandlerType } from '@mv/simple-lambda-api-router/dist/classes/AwsSamRouter';
-import { createController } from '@mv/simple-lambda-api-router/dist/utils/controller';
+import AwsSamRouter, { HandlerType } from 'simple-lambda-api-router/dist/classes/AwsSamRouter';
+import { createController } from 'simple-lambda-api-router/dist/utils/controller';
 
 // Use the SAM router
 const router = new AwsSamRouter();
