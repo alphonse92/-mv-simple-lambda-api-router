@@ -1,6 +1,24 @@
 {
   "name": "simple-lambda-api-router",
+  "author": "Eliecer Alejandro Molina Vergel",
+  "description": "Simple and lightweight lambda api router.",
+  "license": "ISC",
   "version": "1.0.5",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alphonse92/-mv-simple-lambda-api-router"
+  },
+  "keywords": [
+    "aws sam",
+    "aws",
+    "sam",
+    "api",
+    "router",
+    "api router",
+    "typescript",
+    "node",
+    "node js"
+  ],
   "files": [
     "dist/*"
   ],
@@ -16,18 +34,6 @@
     "test:tsmodule": "npx jest --testMatch \"$(pwd)/tsmodule.test.ts\"",
     "publish:npm:patch": "npm run test:modules && npm version patch && npm publish"
   },
-  "license": "ISC",
-  "keywords": [
-    "aws sam",
-    "aws",
-    "sam",
-    "api",
-    "router",
-    "api router",
-    "typescript",
-    "node",
-    "node js"
-  ],
   "dependencies": {
     "http-errors": "^2.0.0"
   },
