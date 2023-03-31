@@ -1,5 +1,5 @@
 {
-  "name": "@mv/simple-lambda-api-router",
+  "name": "simple-lambda-api-router",
   "version": "1.0.0",
   "files": [
     "dist/*"
@@ -13,7 +13,8 @@
     "test": "jest",
     "test:modules": "npm run test:commonjs && npm run test:tsmodule",
     "test:commonjs": "npx jest --testMatch \"$(pwd)/commonjs.test.js\"",
-    "test:tsmodule": "npx jest --testMatch \"$(pwd)/tsmodule.test.ts\""
+    "test:tsmodule": "npx jest --testMatch \"$(pwd)/tsmodule.test.ts\"",
+    "publish:npm:patch": "npm run test:modules && npm version patch && npm publish"
   },
   "license": "ISC",
   "dependencies": {

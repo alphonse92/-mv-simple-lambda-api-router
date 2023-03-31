@@ -1,4 +1,4 @@
-# @mv/simple-lambda-api-router
+# simple-lambda-api-router
 
 Simple and lightweight lambda api router.
 
