@@ -2,6 +2,32 @@
 
 Simple and lightweight lambda api router.
 
+# CommonJS
+
+```javascript
+const { createController } = require('./dist/utils/controller');
+const { AwsSamRouter } = require('./dist/classes');
+
+// Use the SAM router
+const router = new AwsSamRouter();
+
+router.use(
+  // Resources should match with the template.yml api paths
+  '/user/{type}/clients/{id+}',
+  createController({
+    // should each be a HTTP method in lower case
+    get: async (event, context) => {
+      return { statusCode: 200, body: 'hello world' };
+    },
+  }),
+);
+
+/**
+ * Expose and export the lambda handler
+ */
+export const lambdaHandler = router.expose();
+```
+
 # Usage with AWS SAM
 
 ```typescript
@@ -59,4 +85,4 @@ const controller = createController<HandlerType>({
 export default controller;
 ```
 
- If you dont want to use middy you are free to use the library of your preference, but you should pass that function to the controller configuration object.
+If you dont want to use middy you are free to use the library of your preference, but you should pass that function to the controller configuration object.

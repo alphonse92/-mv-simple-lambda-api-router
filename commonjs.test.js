@@ -3,9 +3,7 @@
 const { faker } = require('@faker-js/faker');
 const { NotImplementedControllerError, NotImplementedHandler } = require('./dist/errors/http');
 const { createController } = require('./dist/utils/controller');
-const classes = require('./dist/classes');
-
-const { AwsSamRouter } = classes;
+const { AwsSamRouter } = require('./dist/classes');
 
 describe('AwsSamRouter', () => {
   it('Should route succesfully', async () => {
