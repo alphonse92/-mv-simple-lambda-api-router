@@ -55,9 +55,34 @@ router.use(
 export const lambdaHandler = router.expose();
 ```
 
+# Usage with AWS Url Lambda
+
+```typescript
+import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { NotImplementedControllerError, NotImplementedHandler } from '../../errors/http';
+import { createController } from '../../utils/controller';
+import AwsProxyRouter, { HandlerType } from '../AwsProxyRouter';
+import RouterBase from '../RouterBase';
+
+// Instance of AwsProxyRouter
+const router = new AwsProxyRouter();
+
+router.use(
+  // It supports express-like paths
+  '/resource/:type/user/:id?',
+  createController<HandlerType>({
+    get: async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+      return { statusCode: 200, body: faker.datatype.string() };
+    },
+  }),
+);
+
+export const lambdaHandler = router.expose();
+```
+
 ## Setting middy middlewares
 
-Sometimes you need middlewares capabilites. For that instance you might want to use [middy](https://middy.js.org/).
+Sometimes you need middlewares capabilites. For that instance you might want to use [middy](https://middy.js.org/). Middlewares works for both routers: AwsProxyRouter and AwsSamRouter
 
 ```typescript
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
