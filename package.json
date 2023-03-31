@@ -1,5 +1,5 @@
 {
-  "name": "api-utils",
+  "name": "@mv/simple-lambda-api-router",
   "version": "1.0.0",
   "files": [
     "dist/*"
