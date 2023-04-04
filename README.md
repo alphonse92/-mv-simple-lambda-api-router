@@ -87,6 +87,16 @@ export const lambdaHandler = router.expose();
 
 # Using decorators
 
+Decorators are a great option to the people who want to do more writing less. Since decorators are not supported natively on JS it's only supported by typescript.
+
+The only thing you should worry about is your business logic implementation. One class and one decorator are enough to start routing. The following examples shows how it works:
+
+# Using the AwsProxyRouter
+
+The paths are express-like. So, you may be familiar with that.
+
+See example here:  https://github.com/alphonse92/AwsProxyRouterExample
+
 ```typescript
 // replace the types according with the handler schema you are using. In this example we are using AWS
 // so the event schema will be APIGatewayProxyEvent
@@ -162,6 +172,82 @@ router.use(userController.createUser);
 router.use(userController.deleteUser);
 
 export const lambdaHandler = router.expose();
+```
+
+# Using the sam router
+
+Take in mind your route paths MUST match with your paths in your template.yaml
+
+See example here:  https://github.com/alphonse92/AwsSamRouterExample
+
+```typescript
+class UserController {
+  @Route('get', '/user/{id}/')
+  async getUser(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.getUser();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('get', '/user/')
+  async getUsers(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.getUsers();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('post', '/user/')
+  async createUser(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.createUser();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('delete', '/user/{id}/')
+  async deleteUser(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.deleteUser();
+    return { statusCode: 200, body: 'ok' };
+  }
+}
+
+class ClientsController {
+  @Route('get', '/user/clients/{id}/')
+  async getClient(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.getClient();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('get', '/user/clients/')
+  async getClients(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.getClients();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('post', '/user/clients/')
+  async createClient(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.createClient();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('delete', '/user/clients/{id}/')
+  async deleteClient(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.deleteClient();
+    return { statusCode: 200, body: 'ok' };
+  }
+}
+
+const router = new AwsSamRouter();
+const userController = new UserController();
+const clientsController = new ClientsController();
+
+router.use(clientsController.getClient);
+router.use(clientsController.getClients);
+router.use(clientsController.createClient);
+router.use(clientsController.deleteClient);
+
+router.use(userController.getUser);
+router.use(userController.getUsers);
+router.use(userController.createUser);
+router.use(userController.deleteUser);
+
+export const handler = router.expose();
 ```
 
 ## Setting middy middlewares

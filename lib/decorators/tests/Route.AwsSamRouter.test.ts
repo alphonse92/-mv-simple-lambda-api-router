@@ -79,9 +79,10 @@ router.use(userController.getUsers);
 router.use(userController.createUser);
 router.use(userController.deleteUser);
 
+const handler = router.expose();
+
 function assert(serviceFn, { resource, httpMethod }) {
   it(`should route to ${httpMethod} ${resource}`, async () => {
-    const handler = router.expose();
     const result = await handler({ resource, httpMethod } as APIGatewayProxyEvent, {} as Context);
     expect(result.body).toEqual('ok');
     expect(serviceFn).toHaveBeenCalled();
