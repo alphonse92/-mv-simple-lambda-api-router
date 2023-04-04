@@ -85,6 +85,85 @@ router.use(
 export const lambdaHandler = router.expose();
 ```
 
+# Using decorators
+
+```typescript
+// replace the types according with the handler schema you are using. In this example we are using AWS
+// so the event schema will be APIGatewayProxyEvent
+
+import { APIGatewayProxyResult, APIGatewayProxyEvent, Context } from 'aws-lambda';
+import Route from '../Route';
+import AwsProxyRouter from '../../classes/AwsProxyRouter';
+import userService from '../services/UserService/';
+
+class UserController {
+  @Route('get', '/user/:id')
+  async getUser(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.getUser();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('get', '/user')
+  async getUsers(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.getUsers();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('post', '/user')
+  async createUser(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.createUser();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('delete', '/user/:id')
+  async deleteUser(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.deleteUser();
+    return { statusCode: 200, body: 'ok' };
+  }
+}
+
+class ClientsController {
+  @Route('get', '/user/clients/:id')
+  async getClient(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.getClient();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('get', '/user/clients')
+  async getClients(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.getClients();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('post', '/user/clients')
+  async createClient(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.createClient();
+    return { statusCode: 200, body: 'ok' };
+  }
+
+  @Route('delete', '/user/clients/:id')
+  async deleteClient(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
+    userService.deleteClient();
+    return { statusCode: 200, body: 'ok' };
+  }
+}
+const router = new AwsProxyRouter();
+const userController = new UserController();
+const clientsController = new ClientsController();
+
+router.use(clientsController.getClient);
+router.use(clientsController.getClients);
+router.use(clientsController.createClient);
+router.use(clientsController.deleteClient);
+
+router.use(userController.getUser);
+router.use(userController.getUsers);
+router.use(userController.createUser);
+router.use(userController.deleteUser);
+
+export const lambdaHandler = router.expose();
+```
+
 ## Setting middy middlewares
 
 Sometimes you need middlewares capabilites. For that instance you might want to use [middy](https://middy.js.org/). Middlewares works for both routers: AwsProxyRouter and AwsSamRouter
