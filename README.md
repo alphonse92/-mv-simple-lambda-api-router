@@ -64,10 +64,9 @@ export const lambdaHandler = router.expose();
 
 ```typescript
 import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { NotImplementedControllerError, NotImplementedHandler } from '../../errors/http';
-import { createController } from '../../utils/controller';
-import AwsProxyRouter, { HandlerType } from '../AwsProxyRouter';
-import RouterBase from '../RouterBase';
+import { NotImplementedControllerError, NotImplementedHandler } from 'simple-lambda-api-router/dist/errors/http';
+import { createController } from 'simple-lambda-api-router/dist//utils/controller';
+import AwsProxyRouter, { HandlerType } from 'simple-lambda-api-router/dist/classes/AwsProxyRouter';
 
 // Instance of AwsProxyRouter
 const router = new AwsProxyRouter();
@@ -95,15 +94,15 @@ The only thing you should worry about is your business logic implementation. One
 
 The paths are express-like. So, you may be familiar with that.
 
-See example here:  https://github.com/alphonse92/AwsProxyRouterExample
+See example here: https://github.com/alphonse92/AwsProxyRouterExample
 
 ```typescript
 // replace the types according with the handler schema you are using. In this example we are using AWS
 // so the event schema will be APIGatewayProxyEvent
 
 import { APIGatewayProxyResult, APIGatewayProxyEvent, Context } from 'aws-lambda';
-import Route from '../Route';
-import AwsProxyRouter from '../../classes/AwsProxyRouter';
+import Route from 'simple-lambda-api-router/dist/decorators/Route';
+import AwsProxyRouter from 'simple-lambda-api-router/dist/classes/AwsProxyRouter';
 import userService from '../services/UserService/';
 
 class UserController {
@@ -178,9 +177,14 @@ export const lambdaHandler = router.expose();
 
 Take in mind your route paths MUST match with your paths in your template.yaml
 
-See example here:  https://github.com/alphonse92/AwsSamRouterExample
+See example here: https://github.com/alphonse92/AwsSamRouterExample
 
 ```typescript
+import { APIGatewayProxyResult, APIGatewayProxyEvent, Context } from 'aws-lambda';
+import Route from 'simple-lambda-api-router/dist/decorators/Route';
+import AwsProxyRouter from 'simple-lambda-api-router/dist/classes/AwsProxyRouter';
+import userService from '../services/UserService/';
+
 class UserController {
   @Route('get', '/user/{id}/')
   async getUser(event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
@@ -250,7 +254,7 @@ router.use(userController.deleteUser);
 export const handler = router.expose();
 ```
 
-## Setting middy middlewares
+# Setting middy middlewares
 
 Sometimes you need middlewares capabilites. For that instance you might want to use [middy](https://middy.js.org/). Middlewares works for both routers: AwsProxyRouter and AwsSamRouter
 
@@ -281,3 +285,30 @@ export default controller;
 ```
 
 If you dont want to use middy you are free to use the library of your preference, but you should pass that function to the controller configuration object.
+
+## Setting middlewares to decorators-based controllers
+
+If you are using decorators to build your controllers, you might use a middleware of your preference. To use middlewares on the controllers handlers, you should wrap that function inside the middleware of your preference
+
+```typescript
+import { APIGatewayProxyResult, APIGatewayProxyEvent, Context } from 'aws-lambda';
+import AwsSamRouter from 'simple-lambda-api-router/dist/classes/AwsSamRouter';
+import middy from '@middy/core';
+import httpErrorHandler from '@middy/http-error-handler';
+import httpEventNormalizer from '@middy/http-event-normalizer';
+import httpJsonBodyParser from '@middy/http-json-body-parser';
+
+import userController from '../controllers/user';
+
+const router = new AwsSamRouter();
+const middlewares = [httpErrorHandler(), httpEventNormalizer(), httpJsonBodyParser()];
+
+router.use(middy(userController.getUser).use(middlewares));
+
+export const lambdaHandler = router.expose();
+```
+
+
+# Feedback
+
+I would appreciate any feedback you may have. If you encounter a bug or issue, please don't hesitate to post it in the GitHub repository. Additionally, you can reach me at my email address, alejandromover92@gmail.com, at any time.
