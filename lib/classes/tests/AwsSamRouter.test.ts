@@ -1,9 +1,9 @@
 import { faker } from '@faker-js/faker';
 import { Context, APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { NotImplementedControllerError, NotImplementedHandler } from '../../errors/http';
+import { NotFoundError } from '../../errors/http';
 import { createController } from '../../utils/controller';
 import AwsSamRouter, { HandlerType } from '../AwsSamRouter';
-import RouterBase from '../RouterBase';
+import BaseRouter from '../BaseRouter';
 
 describe('AwsSamRouter', () => {
   it('Should route succesfully', async () => {
@@ -98,7 +98,7 @@ describe('AwsSamRouter', () => {
 
     const handler = router.expose();
     const result = await handler({ resource: '/res1/', httpMethod: 'GET' } as APIGatewayProxyEvent, {} as Context);
-    expect(result).toEqual(RouterBase.errorToHttpError(NotImplementedControllerError));
+    expect(result).toEqual(BaseRouter.errorToHttpError(NotFoundError));
   });
 
   it('Should return an error if handler does not exist', async () => {
@@ -118,6 +118,6 @@ describe('AwsSamRouter', () => {
 
     const handler = router.expose();
     const result = await handler({ resource: '/resource/', httpMethod: 'POST' } as APIGatewayProxyEvent, {} as Context);
-    expect(result).toEqual(RouterBase.errorToHttpError(NotImplementedHandler));
+    expect(result).toEqual(BaseRouter.errorToHttpError(NotFoundError));
   });
 });

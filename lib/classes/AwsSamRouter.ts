@@ -1,33 +1,28 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
-import { InvalidController, NotImplementedControllerError } from '../errors/http';
+import { NotFoundError } from '../errors/http';
 import { RouterHandlerType } from '../types/TRouter';
-import Controller from './Controller';
-import RouterBase from './RouterBase';
+import BaseRouter from './BaseRouter';
+import BaseController from './BaseController';
 
 export type controllerResultType = APIGatewayProxyResult;
 export type HandlerResultType = Promise<controllerResultType>;
 export type HandlerType = (event: APIGatewayProxyEvent, context: Context) => HandlerResultType;
 
-export default class AwsSamRouter extends RouterBase<HandlerType, HandlerResultType> {
+export default class AwsSamRouter extends BaseRouter<HandlerType, HandlerResultType> {
   expose(): HandlerType {
     return (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
       try {
         const { resource, httpMethod } = event;
-        const controller: RouterHandlerType<HandlerType, HandlerResultType> = this.map?.[resource];
+        const mapKey = `${httpMethod.toLowerCase()}${BaseRouter.separator}${resource}`;
+        const controller: RouterHandlerType<HandlerType, HandlerResultType> = this.map?.[mapKey];
 
-        if (!controller) {
-          throw NotImplementedControllerError;
-        }
-        if (controller instanceof Controller) {
-          return controller.getHandler(httpMethod.toLowerCase())(event, context);
-        }
         if (typeof controller === 'function') {
           return controller(event, context);
         }
 
-        throw InvalidController;
+        throw NotFoundError;
       } catch (e) {
-        return Promise.resolve(RouterBase.errorToHttpError(e));
+        return Promise.resolve(BaseRouter.errorToHttpError(e));
       }
     };
   }

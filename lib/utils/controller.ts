@@ -1,7 +1,11 @@
-import Controller from '../classes/Controller';
+import { RouterController } from 'types/TRouter';
 import { IControllerConfig } from '../types/TController';
 
-export const createController = <T>(config: IControllerConfig<T>) => {
-  const controller = new Controller<T>(config);
-  return controller;
+/**
+ * Returns an array of RouteController<T> where T is a function that depends of the router handler
+ * @param config IControllerConfig<T> config object
+ * @returns An array of RouteController<T> where T is a function that depends of the router handler.
+ */
+export const createController = <T>(config: IControllerConfig<T>): RouterController<T>[] => {
+  return Object.entries(config).map(([method, controller]) => ({ method, controller, path: null }));
 };

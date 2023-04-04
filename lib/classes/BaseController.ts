@@ -14,4 +14,8 @@ export default abstract class BaseController<T> implements IController<T> {
 
     return methodHandler;
   }
+
+  getEntries(): [string, T][] {
+    return Object.entries(this.config);
+  }
 }
