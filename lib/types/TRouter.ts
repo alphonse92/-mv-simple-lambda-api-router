@@ -1,6 +1,4 @@
-import { BaseController } from 'classes';
-
-export type RouterHandlerType<T, K> = BaseController<T> | T;
+export type RouterHandlerType<T, K> = T;
 export type RouterMapType<T, K> = {
   [path: string]: RouterHandlerType<T, K>;
 };
