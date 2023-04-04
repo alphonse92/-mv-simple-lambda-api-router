@@ -7,4 +7,5 @@ export const InvalidHandler = createHttpError(500, 'Invalid controller handler',
 export const PathAlreadyExistError = createHttpError(500, 'Path already exist in router', { expose: false });
 export const NotFoundError = createHttpError(404, 'Not found', { expose: true });
 export const ServerError = createHttpError(500, 'Server error', { expose: true });
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const isHttpError = (e: any) => e instanceof createHttpError.HttpError;

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { APIGatewayProxyResult, APIGatewayProxyEvent, Context } from 'aws-lambda';
 import Route from '../Route';
 import AwsProxyRouter from '../../classes/AwsProxyRouter';
@@ -68,19 +69,20 @@ const router = new AwsProxyRouter();
 const userController = new UserController();
 const clientsController = new ClientsController();
 
-router.use(clientsController.getClient);
-router.use(clientsController.getClients);
-router.use(clientsController.createClient);
-router.use(clientsController.deleteClient);
-
 router.use(userController.getUser);
 router.use(userController.getUsers);
 router.use(userController.createUser);
 router.use(userController.deleteUser);
 
+router.use(clientsController.getClient);
+router.use(clientsController.getClients);
+router.use(clientsController.createClient);
+router.use(clientsController.deleteClient);
+
+const handler = router.expose();
+
 function assert(serviceFn, { path, httpMethod }) {
   it(`should route to ${httpMethod} ${path}`, async () => {
-    const handler = router.expose();
     const result = await handler({ path, httpMethod } as APIGatewayProxyEvent, {} as Context);
     expect(result.body).toEqual('ok');
     expect(serviceFn).toHaveBeenCalled();

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { APIGatewayProxyResult, APIGatewayProxyEvent, Context } from 'aws-lambda';
 import Route from '../Route';
 import AwsSamRouter from '../../classes/AwsSamRouter';

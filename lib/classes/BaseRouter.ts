@@ -1,13 +1,13 @@
-import { InvalidController, NotImplementedControllerError, ServerError, isHttpError } from '../errors/http';
+import { NotImplementedControllerError, ServerError, isHttpError } from '../errors/http';
 import { RouterController, RouterMapType } from '../types/TRouter';
 
 export type BaseRouterUseType<T> = RouterController<T>[] | RouterController<T>;
 
-export default abstract class BaseRouter<T, K> {
-  protected map: RouterMapType<T, K> = {};
+export default abstract class BaseRouter<T> {
+  protected map: RouterMapType<T> = {};
   static separator = ':::';
 
-  getMapKey(route: RouterController<T>, separator: string = BaseRouter.separator): string {
+  getMapKey(route: Pick<RouterController<T>, 'path' | 'method'>, separator: string = BaseRouter.separator): string {
     return `${route.method.toLowerCase()}${separator}${route.path}`;
   }
 
@@ -39,6 +39,7 @@ export default abstract class BaseRouter<T, K> {
    *
    * @param args All arguments.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   use(...args: [string, BaseRouterUseType<T>] | [BaseRouterUseType<T> | any]): void {
     if (typeof args[0] === 'string') {
       this.usePath(...(args as [string, BaseRouterUseType<T>]));
@@ -56,6 +57,7 @@ export default abstract class BaseRouter<T, K> {
   }
 
   static errorToHttpError(e) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let error: any = ServerError;
     if (isHttpError(e)) {
       error = e;

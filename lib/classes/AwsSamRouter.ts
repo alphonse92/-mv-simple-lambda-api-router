@@ -7,13 +7,13 @@ export type controllerResultType = APIGatewayProxyResult;
 export type HandlerResultType = Promise<controllerResultType>;
 export type HandlerType = (event: APIGatewayProxyEvent, context: Context) => HandlerResultType;
 
-export default class AwsSamRouter extends BaseRouter<HandlerType, HandlerResultType> {
+export default class AwsSamRouter extends BaseRouter<HandlerType> {
   expose(): HandlerType {
     return (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
       try {
         const { resource, httpMethod } = event;
         const mapKey = `${httpMethod.toLowerCase()}${BaseRouter.separator}${resource}`;
-        const controller: RouterHandlerType<HandlerType, HandlerResultType> = this.map?.[mapKey];
+        const controller: RouterHandlerType<HandlerType> = this.map?.[mapKey];
 
         if (typeof controller === 'function') {
           return controller(event, context);

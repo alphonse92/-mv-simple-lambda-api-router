@@ -33,7 +33,8 @@
     "test:commonjs": "npx jest --testMatch \"$(pwd)/commonjs.test.js\"",
     "test:tsmodule": "npx jest --testMatch \"$(pwd)/tsmodule.test.ts\"",
     "publish:npm:patch": "npm run test:modules && npm version patch && npm publish",
-    "publish:npm:minor": "npm run test:modules && npm version minor && npm publish"
+    "publish:npm:minor": "npm run test:modules && npm version minor && npm publish",
+    "lint": "npx eslint ./lib/**/*.ts"
   },
   "dependencies": {
     "http-errors": "^2.0.0",
