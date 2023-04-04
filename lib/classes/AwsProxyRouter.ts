@@ -13,7 +13,7 @@ export default class AwsProxyRouter extends BaseRouter<HandlerType> {
   lookupExactMatch(receivedMethod: string, receivedPath: string): RouterHandlerType<HandlerType> | undefined {
     const hasTrailingSlash = receivedPath.endsWith('/');
 
-    let pathTrailing, pathNoTrailing;
+    let pathTrailing: string, pathNoTrailing: string;
 
     if (hasTrailingSlash) {
       pathTrailing = receivedPath;
