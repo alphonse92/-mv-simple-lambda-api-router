@@ -3,8 +3,8 @@
     "rootDir": "./lib",
     "baseUrl": "./lib" /* Base directory to resolve non-absolute module names. */ /* List of folders to include type definitions from. */,
     "outDir": "dist" /* Redirect output structure to the directory. */,
-    "types": ["node","jest"] /* Type declaration files to be included in compilation. */,
-    
+    "types": ["node", "jest"] /* Type declaration files to be included in compilation. */,
+
     // declarations
     "declaration": true,
     "declarationDir": "dist",
