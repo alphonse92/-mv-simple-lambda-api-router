@@ -35,6 +35,7 @@
     "publish:npm:patch": "npm run compile && npm run test:modules && npm version patch && npm publish",
     "publish:npm:minor": "npm run compile && npm run test:modules && npm version minor && npm publish",
     "publish:npm:noversion": "npm run compile && npm run test:modules && npm publish",
+    "publish:beta": "npm publish --tag beta",
     "lint": "npx eslint ./lib/**/*.ts"
   },
   "dependencies": {
