@@ -3,7 +3,7 @@
   "author": "Eliecer Alejandro Molina Vergel",
   "description": "Simple and lightweight lambda api router.",
   "license": "ISC",
-  "version": "1.1.10",
+  "version": "1.2.10-beta.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/alphonse92/-mv-simple-lambda-api-router"
@@ -35,7 +35,7 @@
     "publish:npm:patch": "npm run compile && npm run test:modules && npm version patch && npm publish",
     "publish:npm:minor": "npm run compile && npm run test:modules && npm version minor && npm publish",
     "publish:npm:noversion": "npm run compile && npm run test:modules && npm publish",
-    "publish:beta": "npm publish --tag beta",
+    "publish:beta": "npm run compile && npm run test:modules && npm publish --tag beta",
     "lint": "npx eslint ./lib/**/*.ts"
   },
   "dependencies": {
