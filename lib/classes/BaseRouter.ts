@@ -29,22 +29,30 @@ export default abstract class BaseRouter<T> {
     this.updateConfig(config);
   }
 
+  useAll(routes: RouterController<T>[]) {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const This = this;
+    return new Promise((resolve, reject) => {
+      routes.map((route) => setTimeout(() => This.useController(route)));
+      // setTimeout(() => routes.map(this.useController.bind(this)));
+    });
+  }
+
   /**
    * Overloaded method.
    *
-   * It could be called with one parameter a BaseRouterUseType or array of BaseRouterUseType. Path should be specified in the object.
-   * It could be called with two parameters: path, and BaseRouterUseType;
-   *
-   * I keeps this just for backward compatibility.
-   *
+   * If args is type of [string,RouterController<T>] add a single controller for that path. Usually you call it when using the util createController.
+   * if args is type of [RouterController<T>[]] add a bulk of paths.
    * @param args All arguments.
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  use(...args: [string, BaseRouterUseType<T>] | [BaseRouterUseType<T> | any]): void {
+  use(...args: [string, BaseRouterUseType<T>] | [BaseRouterUseType<T> | any] | [BaseRouterUseType<T>[] | any]): void {
     if (typeof args[0] === 'string') {
       this.usePath(...(args as [string, BaseRouterUseType<T>]));
+    } else if (Array.isArray(args[0])) {
+      this.useAll(args[0]);
     } else {
-      this.useController(...(args as [BaseRouterUseType<T>]));
+      this.useAll([args[0]]);
     }
   }
 
