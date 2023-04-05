@@ -6,6 +6,8 @@ After version 1.2. the router initialization is asynchronous. Why? Async is bett
 
 This router is capable of managing 50K in less than 100 ms, I'm obsessed with the micro optimizations.
 
+![test result](https://raw.githubusercontent.com/alphonse92/-mv-simple-lambda-api-router/main/assets/stress_test_results.png)
+
 However, it won't save you of doing bad controllers. So please stay warm, drink water and do exercise.
 
 Happy Coding! 💻
