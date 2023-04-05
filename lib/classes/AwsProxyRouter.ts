@@ -2,6 +2,7 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda
 import BaseRouter from './BaseRouter';
 import { NotFoundError } from '../errors/http';
 import ProxyRouter from './ProxyRouter';
+import { count } from 'console';
 
 export type controllerResultType = APIGatewayProxyResult;
 export type HandlerResultType = Promise<controllerResultType>;
@@ -9,12 +10,12 @@ export type HandlerType = (event: APIGatewayProxyEvent, context: Context) => Han
 
 export default class AwsProxyRouter extends ProxyRouter<HandlerType> {
   expose(): HandlerType {
-    return (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+    super.expose();
+    return async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
       try {
         const { path, httpMethod } = event;
 
-        const controller = this.lookup(httpMethod, path);
-
+        const controller = await this.lookup(httpMethod, path);
         if (typeof controller === 'function') {
           return controller(event, context);
         }
