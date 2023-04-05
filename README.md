@@ -2,7 +2,17 @@
 
 Simple and lightweight lambda api router.
 
+After version 1.2. the router initialization is asynchronous. Why? Async is better, async is love, you think in async and the day goes better, and you won't pay large AWS bills, why? because IT is async and you will use what you saved in bills for coffee or even better: PIZZA 🍕.
+
+This router is capable of managing 50K in less than 100 ms, I'm obsessed with the micro optimizations.
+
+However, it won't save you of doing bad controllers. So please stay warm, drink water and do exercise.
+
+Happy Coding! 💻
+
 # Example Projects:
+
+Visit the examples to get started
 
 1. https://github.com/alphonse92/AwsProxyRouterExample
 2. https://github.com/alphonse92/AwsSamRouterExample
@@ -307,7 +317,6 @@ router.use(middy(userController.getUser).use(middlewares));
 
 export const lambdaHandler = router.expose();
 ```
-
 
 # Feedback
 
