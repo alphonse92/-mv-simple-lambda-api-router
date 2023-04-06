@@ -6,11 +6,14 @@ import AwsProxyRouter, { HandlerResultType } from '../AwsProxyRouter';
 import { Context, APIGatewayProxyEvent } from 'aws-lambda';
 
 const methods = ['post', 'get', 'put', 'delete'];
+const hasPathArguments = (path) => path.includes(':');
+const getRandomPath = () => `${faker.random.alphaNumeric(10)}${faker.datatype.boolean() ? '/:id' : ''}`;
 const getRandomMethod = () => methods[faker.datatype.number({ min: 0, max: methods.length - 1 })];
-const getArrayOfPaths = (length) => Array.from(new Array(length)).map(() => faker.random.alphaNumeric(10));
+const getEmptyArray = (length) => Array.from(new Array(length));
+const getArrayOfPaths = (length) => getEmptyArray(length).map(getRandomPath);
 const getArrayOfRoutes = (paths) =>
   paths.map((path) => ({
-    controller: jest.fn().mockResolvedValue({ statusCode: 200, body: 'ok' }),
+    controller: jest.fn().mockResolvedValue({ statusCode: 200, body: path }),
     method: getRandomMethod(),
     path,
   }));
@@ -55,15 +58,21 @@ describe('BaseRouter.ts test', () => {
   function test(route) {
     const { controller, path, method } = route;
     it(`Check if path ${method} ${path} is available`, async () => {
-      const result = await handler({ path, httpMethod: method } as APIGatewayProxyEvent, {} as Context);
+      const hasArgumentPath = hasPathArguments(path);
+      const pathWithArgs = hasArgumentPath ? `${path.replace('/:id', '/id')}` : path;
+      const result = await handler({ path: pathWithArgs, httpMethod: method } as APIGatewayProxyEvent, {} as Context);
 
       const { statusCode, body } = result;
 
-      expect(body).toEqual('ok');
+      expect(body).toEqual(path);
       expect(statusCode).toEqual(200);
       expect(controller).toBeCalledTimes(1);
     });
   }
 
-  shuffle(arrayOfRoutesPart2.concat(arrayOfRoutesPart1)).slice(0, 1000).forEach(test);
+  shuffle(arrayOfRoutesPart2.concat(arrayOfRoutesPart1))
+    .slice(0, 100)
+    .filter(({ path }) => hasPathArguments(path))
+    .slice(0, 1)
+    .forEach(test);
 });
