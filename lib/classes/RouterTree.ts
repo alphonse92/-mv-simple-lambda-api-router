@@ -1,4 +1,4 @@
-import { DataStructure } from '../interfaces/DataStructure';
+import { DataStructure, DataStructureIndexType } from '../interfaces/DataStructure';
 import { RouterController } from '../types/TRouter';
 
 export type TreeRoutePath<T> = {
@@ -6,13 +6,16 @@ export type TreeRoutePath<T> = {
   childrenPaths?: TreeRoutePath<T>;
 };
 export default class RouterTree<T> implements DataStructure<T> {
-  insert(index: string | number | symbol, value: T): T {
+  get(index: DataStructureIndexType): T {
     throw new Error('Method not implemented.');
   }
-  remove(index: string | number | symbol): T {
+  insert(index: DataStructureIndexType, value: T): T {
     throw new Error('Method not implemented.');
   }
-  update(index: string | number | symbol, value: T): { new: T; old: T; } {
+  remove(index: DataStructureIndexType): T {
+    throw new Error('Method not implemented.');
+  }
+  update(index: DataStructureIndexType): { new: T; old: T } {
     throw new Error('Method not implemented.');
   }
 }

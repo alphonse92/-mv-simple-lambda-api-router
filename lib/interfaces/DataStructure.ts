@@ -1,6 +1,7 @@
-type indexType = number | string | symbol;
+export type DataStructureIndexType = number | string | symbol | undefined | null;
 export interface DataStructure<T> {
-  insert(index: indexType, value: T): T;
-  remove(index: indexType): T;
-  update(index: indexType, value: T): { new: T; old: T };
+  get(index: DataStructureIndexType): T;
+  insert(index: DataStructureIndexType, value: T): T;
+  remove(index: DataStructureIndexType): T;
+  update(index: DataStructureIndexType, value: T): { new: T; old: T };
 }
