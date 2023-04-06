@@ -14,7 +14,7 @@ export default class AwsSamRouter extends BaseRouter<HandlerType> {
     return controller;
   }
 
-  async lookup(receivedMethod: string, receivedPath: string) {
+  lookup(receivedMethod: string, receivedPath: string) {
     const eventMapHandler = {
       [EVENTS.ALL_ROUTES_PROCESSED]: (data: RouterMapType<HandlerType>) =>
         this._lookup(data, receivedMethod, receivedPath),

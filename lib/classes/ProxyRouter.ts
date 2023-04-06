@@ -1,7 +1,7 @@
 import { pathToRegexp } from 'path-to-regexp';
 import { NotFoundError, NotImplementedControllerError } from '../errors/http';
-import BaseRouter, { EVENTS } from './BaseRouter';
-import { RouterHandlerType, RouterMapType } from '../types/TRouter';
+import BaseRouter, { EVENTS, HandlerByEventMapType } from './BaseRouter';
+import { RouterController, RouterHandlerType, RouterMapType } from '../types/TRouter';
 
 export default class ProxyRouter<T> extends BaseRouter<T> {
   private proxyRouterMap: RouterMapType<T>;
@@ -29,7 +29,7 @@ export default class ProxyRouter<T> extends BaseRouter<T> {
     return map[keyTrail] ?? map[keyNotTrail];
   }
 
-  private _lookup(map: RouterMapType<T>, receivedMethod: string, receivedPath: string): RouterHandlerType<T> {
+  private _lookup(map: RouterMapType<T>, receivedMethod: string, receivedPath: string): T {
     if (!map) {
       throw NotImplementedControllerError;
     }
@@ -39,7 +39,7 @@ export default class ProxyRouter<T> extends BaseRouter<T> {
       return exactController;
     }
 
-    const entries = Object.entries(map);
+    const entries = Object.entries(map) as [string, T][];
     const pathAndController = entries.find(([keyPath]) => {
       const [method, path] = keyPath.split(BaseRouter.separator);
 
@@ -58,9 +58,11 @@ export default class ProxyRouter<T> extends BaseRouter<T> {
     return pathAndController[1];
   }
 
-  async lookup(receivedMethod: string, receivedPath: string): Promise<RouterHandlerType<T>> {
-    const eventMapHandler = {
+  lookup(receivedMethod: string, receivedPath: string): Promise<T | void> {
+    const eventMapHandler: HandlerByEventMapType<T> = {
       [EVENTS.ALL_ROUTES_PROCESSED]: (data: RouterMapType<T>) => this._lookup(data, receivedMethod, receivedPath),
+      [EVENTS.ROUTE_PROCESSED]: (data: RouterMapType<T>, route: RouterController<T>) =>
+        console.log('procesing route:', route),
     };
 
     return super.lookupInCustomRouter(eventMapHandler);

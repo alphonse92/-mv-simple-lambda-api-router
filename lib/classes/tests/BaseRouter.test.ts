@@ -70,7 +70,7 @@ describe('BaseRouter.ts test', () => {
     });
   }
 
-  shuffle(arrayOfRoutesPart2.concat(arrayOfRoutesPart1))
+  arrayOfRoutesPart2
     .slice(0, 100)
     .filter(({ path }) => hasPathArguments(path))
     .slice(0, 1)
