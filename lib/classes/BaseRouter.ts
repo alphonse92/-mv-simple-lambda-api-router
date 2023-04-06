@@ -26,6 +26,7 @@ export default abstract class BaseRouter<T> {
    * @param receivedMethod
    * @param receivedPath
    */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   protected lookup(receivedMethod: string, receivedPath: string): ControllerLookupResponseType<T> {
     throw NotImplementedYet;
   }
