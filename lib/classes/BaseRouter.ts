@@ -1,5 +1,6 @@
 import { NotImplementedYet, ServerError, isHttpError } from '../errors/http';
 import { RouterController, RouterHandlerType, RouterMapType } from '../types/TRouter';
+import RouterTree from './RouterTree';
 
 export enum EVENTS {
   ROUTE_PROCESSED = 'ROUTE_PROCESSED',
@@ -11,11 +12,11 @@ export type EventListenerCallbackType<T> = (data: RouterMapType<T>, route?: Rout
 export type EventListenerType<T> = (event: EVENTS, data: RouterMapType<T>, route?: RouterController<T>) => void;
 export type HandlerByEventMapType<T> = { [event in EVENTS]?: EventListenerCallbackType<T> };
 
-export default abstract class BaseRouter<T> {
-  protected map: RouterMapType<T> = {};
-  protected allRoutesLoaded = false;
-
+export default abstract class BaseRouter<T> extends RouterTree<T> {
   static separator = ':::';
+
+  protected map: RouterMapType<T> = {};
+  protected __allRoutesLoaded = false;
   private __isExposed = false;
   private __totalOfRoutes = 0;
   private __routesProccesed = 0;
@@ -43,7 +44,7 @@ export default abstract class BaseRouter<T> {
 
   private emitPartial(map: RouterMapType<T>, route: RouterController<T>) {
     if (this.__routesProccesed === this.__totalOfRoutes && this.__isExposed) {
-      this.allRoutesLoaded = true;
+      this.__allRoutesLoaded = true;
       this.emit(EVENTS.ALL_ROUTES_PROCESSED, this.map, route);
       return;
     }
@@ -79,7 +80,7 @@ export default abstract class BaseRouter<T> {
       };
 
       // If router is 100% loaded then get the event handler when the router has been finished
-      if (this.allRoutesLoaded) {
+      if (this.__allRoutesLoaded) {
         const eventHandler = eventMapHandler[EVENTS.ALL_ROUTES_PROCESSED];
         eventHandler(this.map);
         return;
