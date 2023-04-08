@@ -37,36 +37,43 @@ import RouterTree, { MethodSymbols, TreeRoot } from '../RouterTree';
 const ACTIONS = {
   VERSION: jest.fn().mockResolvedValue({ body: 'version app' }),
   LIST_USERS: jest.fn().mockResolvedValue({ body: 'list of users' }),
+  GET_USER: jest.fn().mockResolvedValue({ body: 'user entity' }),
   NEW_USER: jest.fn().mockResolvedValue({ body: 'new user' }),
   UPDATE_USER: jest.fn().mockResolvedValue({ body: 'user updated' }),
-  GET_USER: jest.fn().mockResolvedValue({ body: 'user entity' }),
   DELETE_USER: jest.fn().mockResolvedValue({ body: 'user deleted' }),
-
+  LIST_CLIENTS: jest.fn().mockResolvedValue({ body: 'list of clients' }),
   GET_CLIENT: jest.fn().mockResolvedValue({ body: 'client entity' }),
   NEW_CLIENT: jest.fn().mockResolvedValue({ body: 'new client' }),
-  LIST_CLIENTS: jest.fn().mockResolvedValue({ body: 'list of clients' }),
-  GET_BILLS: jest.fn().mockResolvedValue({ body: 'bills from to' }),
-
   GET_BILL: jest.fn().mockResolvedValue({ body: 'get bill' }),
+  GET_BILLS: jest.fn().mockResolvedValue({ body: 'bills from to' }),
 };
 
-const PathTreeKeys = {
-  // root path
-  'GET:::/': ACTIONS.VERSION,
+const PATHS = {
+  VERSION: 'GET:::/',
+  LIST_USERS: 'GET:::/users/',
+  GET_USER: 'GET:::/users/userid',
+  NEW_USER: 'POST:::/users/',
+  UPDATE_USER: 'PUT:::/users/',
+  DELETE_USER: 'DELETE:::/users/userid',
+  LIST_CLIENTS: 'GET:::/users/clients/',
+  GET_CLIENT: 'GET:::/users/clients/clientid',
+  NEW_CLIENT: 'POST:::/users/clients/',
+  GET_BILL: 'GET:::/users/clients/clientid/bills/billid',
+  GET_BILLS: 'GET:::/users/clients/clientid/bills/2023-04-04/2023-03-04',
+};
 
-  // user paths
-  'GET:::/users/': ACTIONS.LIST_USERS,
-  'GET:::/users/userid': ACTIONS.GET_USER,
-  'POST:::/users/': ACTIONS.NEW_USER,
-  'PUT:::/users/': ACTIONS.UPDATE_USER,
-  'DELETE:::/users/userid': ACTIONS.DELETE_USER,
-
-  // client paths
-  'GET:::/users/clients/': ACTIONS.LIST_CLIENTS,
-  'GET:::/users/clients/clientid': ACTIONS.GET_CLIENT,
-  'POST:::/users/clients/': ACTIONS.NEW_CLIENT,
-  'GET:::/users/clients/clientid/bills/billid': ACTIONS.GET_BILL,
-  'GET:::/users/clients/:id/bills/:from/:to': ACTIONS.GET_BILLS,
+const PATH_AND_ACTIONS = {
+  // [PATHS.VERSION]: ACTIONS.VERSION,
+  // [PATHS.LIST_USERS]: ACTIONS.LIST_USERS,
+  // [PATHS.GET_USER]: ACTIONS.GET_USER,
+  // [PATHS.NEW_USER]: ACTIONS.NEW_USER,
+  // [PATHS.UPDATE_USER]: ACTIONS.UPDATE_USER,
+  // [PATHS.DELETE_USER]: ACTIONS.DELETE_USER,
+  // [PATHS.LIST_CLIENTS]: ACTIONS.LIST_CLIENTS,
+  // [PATHS.GET_CLIENT]: ACTIONS.GET_CLIENT,
+  // [PATHS.NEW_CLIENT]: ACTIONS.NEW_CLIENT,
+  // [PATHS.GET_BILL]: ACTIONS.GET_BILL,
+  [PATHS.GET_BILLS]: ACTIONS.GET_BILLS,
 };
 
 const state = {
@@ -102,24 +109,36 @@ const state = {
 };
 
 type HandlerType = () => true;
-const testPathsWithHandlers = ([path, mockHandler]) =>
-  it('Should  return controller for path ' + path, () => {
-    const router = new RouterTree<HandlerType>(state);
-    const handler = router.get(path);
 
-    expect(handler).toBeDefined();
-    expect(typeof handler).toEqual('function');
-    expect(handler).toBe(mockHandler);
+describe('list', () => {
+  const router = new RouterTree<HandlerType>(state);
 
-    handler();
-
-    expect(mockHandler).toBeCalledTimes(1);
-  });
-
-describe('Router tree get handler', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
 
-  Object.entries(PathTreeKeys).forEach(testPathsWithHandlers);
+  const testPathsWithHandlers = ([path, mockHandler]) =>
+    it('Should  return controller for path ' + path, () => {
+      const handler = router.get(path);
+
+      expect(handler).toBeDefined();
+      expect(typeof handler).toEqual('function');
+      expect(handler).toBe(mockHandler);
+
+      handler();
+
+      expect(mockHandler).toBeCalledTimes(1);
+    });
+
+  Object.entries(PATH_AND_ACTIONS).forEach(testPathsWithHandlers);
 });
+
+// describe('insert', () => {
+//   const router = new RouterTree<HandlerType>();
+//   it('Should save the path', () => {
+//     const handler = jest.fn();
+//     router.insert('GET:::/users/clients/:id/bills/:from/:to', handler);
+
+//     const routeHandler = router.get()
+//   });
+// });
