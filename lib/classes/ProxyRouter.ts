@@ -61,8 +61,7 @@ export default class ProxyRouter<T> extends BaseRouter<T> {
   lookup(receivedMethod: string, receivedPath: string): Promise<T | void> {
     const eventMapHandler: HandlerByEventMapType<T> = {
       [EVENTS.ALL_ROUTES_PROCESSED]: (data: RouterMapType<T>) => this._lookup(data, receivedMethod, receivedPath),
-      [EVENTS.ROUTE_PROCESSED]: (data: RouterMapType<T>, route: RouterController<T>) =>
-        console.log('procesing route:', route),
+      // [EVENTS.ROUTE_PROCESSED]: (data: RouterMapType<T>, route: RouterController<T>) => true,
     };
 
     return super.lookupInCustomRouter(eventMapHandler);

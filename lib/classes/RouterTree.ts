@@ -38,6 +38,11 @@ export type TreeRoot<T> = {
   [path: string]: TreeRoot<T>;
 } & TreeNodeMethods<T>;
 
+export type IteratorEvent<T> = {
+  onEnd: (method: string, tokens: string[], tree: TreeRoot<T>) => TreeRoot<T>;
+  onNotFound: (method: string, currentToken: string, tree: TreeRoot<T>) => undefined;
+};
+
 export type RouterRoot<T> = {
   [RouterRootBase]: TreeRoot<T>;
 };
@@ -60,7 +65,6 @@ export default class RouterTree<T> implements IDataStructure<T> {
 
   getSymbolMethod(method: string) {
     const symbol = MethodSymbols[method.toLowerCase()];
-    console.log('getSymbolMethod:::', method, symbol);
     return symbol;
   }
 
@@ -68,9 +72,6 @@ export default class RouterTree<T> implements IDataStructure<T> {
     // methods uses symbols to get the keys in the tree store
     // So we'll be safe if we receive a token with "get" or "post"
     const partialTree = tree[token];
-    if (partialTree) {
-      console.log('matchExact::', 'token found', token);
-    }
     return partialTree;
   }
 
@@ -91,33 +92,44 @@ export default class RouterTree<T> implements IDataStructure<T> {
     if (!result) return;
 
     const [path, partialTree] = result;
-    if (partialTree) {
-      console.log('matchWith:::', 'token found', token);
-    }
+
     return partialTree as TreeRoot<T>;
   }
 
   match(token: string, tree: TreeRoot<T>): TreeRoot<T> | undefined {
-    console.log('match::', token);
     const result = this.matchExact(token, tree) ?? this.matchWith(token, tree) ?? undefined;
 
     return result;
   }
 
-  search(method: METHODS, tokens: string[], tree: TreeRoot<T>): TreeRoot<T> | undefined {
+  iterate(method: METHODS, tokens: string[], tree: TreeRoot<T>, events: IteratorEvent<T>): TreeRoot<T> | undefined {
     const end = !Boolean(tokens.length);
 
-    if (end) return tree;
-
-    const [currentToken, ...restOfTokens] = tokens;
-
-    const partialTree: TreeRoot<T> | undefined = this.match(currentToken, tree);
-
-    if (!partialTree) {
-      return;
+    // No more way to go, then return the tree.
+    if (end) {
+      return events.onEnd(method, tokens, tree);
     }
 
-    return this.search(method, restOfTokens ?? [], partialTree);
+    // Otherwise get the first token
+    const [currentToken, ...restOfTokens] = tokens;
+
+    // try to get the tree for a given token in the current state tree
+    const partialTree: TreeRoot<T> | undefined = this.match(currentToken, tree);
+
+    // Tree not found, means path does not exist
+    if (!partialTree) {
+      return events.onNotFound(method, currentToken, tree);
+    }
+
+    // Keep looping
+    return this.iterate(method, restOfTokens ?? [], partialTree, events);
+  }
+
+  search(method: METHODS, tokens: string[], tree: TreeRoot<T>): TreeRoot<T> | undefined {
+    return this.iterate(method, tokens, tree, {
+      onEnd: (method: METHODS, tokens: string[], tree: TreeRoot<T>): TreeRoot<T> => tree,
+      onNotFound: (method: METHODS, currentToken: string, tree: TreeRoot<T>): undefined => undefined,
+    });
   }
 
   /**
@@ -128,11 +140,9 @@ export default class RouterTree<T> implements IDataStructure<T> {
   get(index: string): T | undefined {
     const [method, fullPath] = index.split(RouterTree.SEPARATOR);
     const tokens = fullPath.split('/').filter(Boolean);
-    console.log(JSON.stringify({ method, tokens }, null, 2));
     const partialTree = this.search(method as METHODS, tokens, this.getRoot()) as TreeNodeMethods<T>;
     const symbol = this.getSymbolMethod(method);
     const handler = partialTree[symbol];
-    console.log('get::', 'search end', partialTree, 'symbol', symbol, 'handler', handler);
     return handler;
   }
 
