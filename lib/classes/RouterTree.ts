@@ -38,11 +38,19 @@ export type TreeRoot<T> = {
   [path: string]: TreeRoot<T>;
 } & TreeNodeMethods<T>;
 
-export type IteratorEvent<T> = {
-  onEnd: (method: string, tokens: string[], tree: TreeRoot<T>) => TreeRoot<T>;
-  onNotFound: (method: string, currentToken: string, tree: TreeRoot<T>) => undefined;
+export enum IteratorResultTypes {
+  END = 'END',
+  NOT_FOUND = 'NOT_FOUND',
+}
+export type IteratorResultType<T> = {
+  status: IteratorResultTypes;
+  tree?: TreeRoot<T>;
+  tokens?: string[];
+  currentToken?: string;
 };
-
+export type MatchSingleResultType<T> = { path: string; tree: TreeRoot<T> };
+export type MatchMultipleResults<T> = MatchSingleResultType<T>[];
+export type MatchResult<T> = MatchMultipleResults<T> | MatchSingleResultType<T> | undefined;
 export type RouterRoot<T> = {
   [RouterRootBase]: TreeRoot<T>;
 };
@@ -62,17 +70,18 @@ export default class RouterTree<T> implements IDataStructure<T> {
   getRoot(): TreeRoot<T> {
     return this.state[RouterRootBase];
   }
+  z;
 
   getSymbolMethod(method: string) {
     const symbol = MethodSymbols[method.toLowerCase()];
     return symbol;
   }
 
-  matchExact(token: string, tree: TreeRoot<T>): TreeRoot<T> | undefined {
+  matchExact(token: string, tree: TreeRoot<T>): MatchSingleResultType<T> | undefined {
     // methods uses symbols to get the keys in the tree store
     // So we'll be safe if we receive a token with "get" or "post"
     const partialTree = tree[token];
-    return partialTree;
+    return { path: token, tree: partialTree };
   }
 
   /**
@@ -82,54 +91,65 @@ export default class RouterTree<T> implements IDataStructure<T> {
    * @param tree
    * @returns
    */
-  matchWith(token: string, tree: TreeRoot<T>): TreeRoot<T> | undefined {
-    const result = Object.entries(tree).find(([path]) => {
+  matchWith(token: string, tree: TreeRoot<T>): MatchMultipleResults<T> {
+    return Object.entries(tree).reduce((acc, [path, leef]) => {
       const regexp = pathToRegexp(path);
       const result = regexp.exec(token);
-      return Boolean(result?.length);
-    });
-
-    if (!result) return;
-
-    const [path, partialTree] = result;
-
-    return partialTree as TreeRoot<T>;
+      if (result?.length) return [...acc, { path, tree: leef as TreeRoot<T> }];
+      return [...acc];
+    }, [] as unknown as MatchMultipleResults<T>);
   }
 
-  match(token: string, tree: TreeRoot<T>): TreeRoot<T> | undefined {
-    const result = this.matchExact(token, tree) ?? this.matchWith(token, tree) ?? undefined;
+  match(token: string, tree: TreeRoot<T>): MatchMultipleResults<T> {
+    const result: MatchResult<T> = this.matchExact(token, tree);
 
-    return result;
+    if (result?.tree) return [result];
+
+    return this.matchWith(token, tree);
   }
 
-  iterate(method: METHODS, tokens: string[], tree: TreeRoot<T>, events: IteratorEvent<T>): TreeRoot<T> | undefined {
+  iterate(tokens: string[], tree: TreeRoot<T>): IteratorResultType<T> {
     const end = !Boolean(tokens.length);
 
-    // No more way to go, then return the tree.
+    // Tokens is empty and there is not way to keep looping.
+    // That means we found the path
     if (end) {
-      return events.onEnd(method, tokens, tree);
+      // return the path
+      return { status: IteratorResultTypes.END, tree, tokens };
     }
 
     // Otherwise get the first token
     const [currentToken, ...restOfTokens] = tokens;
 
     // try to get the tree for a given token in the current state tree
-    const partialTree: TreeRoot<T> | undefined = this.match(currentToken, tree);
+    const partialTree: MatchMultipleResults<T> = this.match(currentToken, tree);
 
-    // Tree not found, means path does not exist
-    if (!partialTree) {
-      return events.onNotFound(method, currentToken, tree);
+    // Formalize to an array of results
+    const arrayOfPartialTree: MatchMultipleResults<T> = Array.isArray(partialTree) ? partialTree : [partialTree];
+
+    // A path may match with parameter paths. In any case it will be an array of matches. Then loop in-order
+    for (let i = 0; i < arrayOfPartialTree.length; i++) {
+      const { tree: leef } = arrayOfPartialTree[i];
+
+      // Iterates in order
+      const value = this.iterate(restOfTokens ?? [], leef);
+
+      // If it reaches the end, then return the value and stop.
+      if (value?.status === IteratorResultTypes.END) {
+        return value;
+      }
     }
 
-    // Keep looping
-    return this.iterate(method, restOfTokens ?? [], partialTree, events);
+    // default case: path was not found and return the last seen leef
+    return { status: IteratorResultTypes.NOT_FOUND, tree };
   }
 
-  search(method: METHODS, tokens: string[], tree: TreeRoot<T>): TreeRoot<T> | undefined {
-    return this.iterate(method, tokens, tree, {
-      onEnd: (method: METHODS, tokens: string[], tree: TreeRoot<T>): TreeRoot<T> => tree,
-      onNotFound: (method: METHODS, currentToken: string, tree: TreeRoot<T>): undefined => undefined,
-    });
+  search(tokens: string[], tree: TreeRoot<T>): TreeRoot<T> | undefined {
+    const result = this.iterate(tokens, tree);
+
+    if (result?.status === IteratorResultTypes.END) {
+      return result.tree;
+    }
   }
 
   /**
@@ -140,10 +160,18 @@ export default class RouterTree<T> implements IDataStructure<T> {
   get(index: string): T | undefined {
     const [method, fullPath] = index.split(RouterTree.SEPARATOR);
     const tokens = fullPath.split('/').filter(Boolean);
-    const partialTree = this.search(method as METHODS, tokens, this.getRoot()) as TreeNodeMethods<T>;
+    const partialTree = this.search(tokens, this.getRoot());
+
+    if (!partialTree) return;
+
     const symbol = this.getSymbolMethod(method);
-    const handler = partialTree[symbol];
+    const handler = partialTree[symbol] as T;
     return handler;
+  }
+
+  insertLeef(method: string, tree: TreeRoot<T>, currentToken: string, value: T): unknown {
+    tree[currentToken][MethodSymbols[method.toLowerCase()]] = value;
+    return tree;
   }
 
   /**
@@ -151,12 +179,14 @@ export default class RouterTree<T> implements IDataStructure<T> {
    * @param index IDataStructureIndexType index where the value will be stored
    * @param value
    */
-  insert(index: IDataStructureRequiredIndexType, value: T): T {
+  insert(index: string, value: T): T {
     throw new Error('Method not implemented.');
   }
+
   remove(index: IDataStructureRequiredIndexType): T {
     throw new Error('Method not implemented.');
   }
+
   update(index: IDataStructureRequiredIndexType): { new: T; old: T } {
     throw new Error('Method not implemented.');
   }
