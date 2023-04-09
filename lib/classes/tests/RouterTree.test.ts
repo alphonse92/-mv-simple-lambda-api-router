@@ -1,98 +1,69 @@
 import RouterTree, { MethodSymbols, TreeRoot } from '../RouterTree';
 
-/**
- * This state defines the following paths:
- *
- * Users:
- *
- * 1. GET/ app version
- * 2. GET/users list of users
- * 3. GET/users/:id return a user given an id
- * 4. POST/users creates a new user
- * 5. DELETE/users/:id delete a given
- *
- * Clients:
- * 1. GET/users/clients/ get a list of users
- * 2. GET/users/clients/:id get a user given an id
- * 3. POS/usersT/clients create a new client
- * 4. GET/users/clients/:id/bills/:from/:to get a list of bills between two dates: from and to
- *
- * For a given path:
- *
- * GET /users/clients/1/bills/2023-03-07/2023-04-07
- *
- * Notes:
- *
- * /users/clients  matchs with /users/:id
- * but it should not return the controler for /users/:id
- *
- * Should return 'bills from to'
- *
- *
- * Flow:
- *
- * The first step is try to matching exactly. If so, returns the controller
- */
-
-const BODY_MOCKS = {
-  VERSION: 'version app',
-  LIST_USERS: 'list of users',
-  GET_USER: 'user entity',
-  GET_USER_PHOTO: 'user photo',
-  NEW_USER: 'new user',
-  UPDATE_USER: 'user updated',
-  DELETE_USER: 'user deleted',
-  LIST_CLIENTS: 'list of clients',
-  GET_CLIENT: 'client entity',
-  NEW_CLIENT: 'new client',
-  GET_BILL: 'get bill',
-  GET_BILLS: 'bills from to',
+const PATHS_DEFS = {
+  VERSION: {
+    path: 'GET:::/',
+    uri: 'GET:::/',
+    handler: jest.fn(),
+  },
+  LIST_USERS: {
+    path: 'GET:::/users/',
+    uri: 'GET:::/users/',
+    handler: jest.fn(),
+  },
+  GET_USER_PHOTO: {
+    path: 'GET:::/users/photo-:foo(\\d+).png',
+    uri: 'GET:::/users/photo-123.png',
+    handler: jest.fn(),
+  },
+  GET_USER: {
+    path: 'GET:::/users/:id',
+    uri: 'GET:::/users/userid',
+    handler: jest.fn(),
+  },
+  NEW_USER: {
+    path: 'POST:::/users/',
+    uri: 'POST:::/users/',
+    handler: jest.fn(),
+  },
+  UPDATE_USER: {
+    path: 'PUT:::/users/',
+    uri: 'PUT:::/users/',
+    handler: jest.fn(),
+  },
+  DELETE_USER: {
+    path: 'DELETE:::/users/:id',
+    uri: 'DELETE:::/users/userid',
+    handler: jest.fn(),
+  },
+  LIST_CLIENTS: {
+    path: 'GET:::/users/clients/',
+    uri: 'GET:::/users/clients/',
+    handler: jest.fn(),
+  },
+  GET_CLIENT: {
+    path: 'GET:::/users/clients/:id',
+    uri: 'GET:::/users/clients/clientid',
+    handler: jest.fn(),
+  },
+  NEW_CLIENT: {
+    path: 'POST:::/users/clients/',
+    uri: 'POST:::/users/clients/',
+    handler: jest.fn(),
+  },
+  GET_BILL: {
+    path: 'GET:::/users/clients/:id/bills/:id',
+    uri: 'GET:::/users/clients/clientid/bills/billid',
+    handler: jest.fn(),
+  },
+  GET_BILLS: {
+    path: 'GET:::/users/clients/:id/bills/:from/:to',
+    uri: 'GET:::/users/clients/clientid/bills/2023-03-04/2023-04-04',
+    handler: jest.fn(),
+  },
 };
 
-const ACTIONS = {
-  VERSION: jest.fn().mockReturnValue({ body: BODY_MOCKS.VERSION }),
-  LIST_USERS: jest.fn().mockReturnValue({ body: BODY_MOCKS.LIST_USERS }),
-  GET_USER: jest.fn().mockReturnValue({ body: BODY_MOCKS.GET_USER }),
-  GET_USER_PHOTO: jest.fn().mockReturnValue({ body: BODY_MOCKS.GET_USER_PHOTO }),
-  NEW_USER: jest.fn().mockReturnValue({ body: BODY_MOCKS.NEW_USER }),
-  UPDATE_USER: jest.fn().mockReturnValue({ body: BODY_MOCKS.UPDATE_USER }),
-  DELETE_USER: jest.fn().mockReturnValue({ body: BODY_MOCKS.DELETE_USER }),
-  LIST_CLIENTS: jest.fn().mockReturnValue({ body: BODY_MOCKS.LIST_CLIENTS }),
-  GET_CLIENT: jest.fn().mockReturnValue({ body: BODY_MOCKS.GET_CLIENT }),
-  NEW_CLIENT: jest.fn().mockReturnValue({ body: BODY_MOCKS.NEW_CLIENT }),
-  GET_BILL: jest.fn().mockReturnValue({ body: BODY_MOCKS.GET_BILL }),
-  GET_BILLS: jest.fn().mockReturnValue({ body: BODY_MOCKS.GET_BILLS }),
-};
-
-const PATHS = {
-  VERSION: 'GET:::/',
-  LIST_USERS: 'GET:::/users/',
-  GET_USER: 'GET:::/users/userid',
-  GET_USER_PHOTO: 'GET:::/users/photo-123.png',
-  NEW_USER: 'POST:::/users/',
-  UPDATE_USER: 'PUT:::/users/',
-  DELETE_USER: 'DELETE:::/users/userid',
-  LIST_CLIENTS: 'GET:::/users/clients/',
-  GET_CLIENT: 'GET:::/users/clients/clientid',
-  NEW_CLIENT: 'POST:::/users/clients/',
-  GET_BILL: 'GET:::/users/clients/clientid/bills/billid',
-  GET_BILLS: 'GET:::/users/clients/clientid/bills/2023-03-04/2023-04-04',
-};
-
-const PATH_AND_ACTIONS = {
-  [PATHS.VERSION]: { expectedResponseBody: BODY_MOCKS.VERSION, handler: ACTIONS.VERSION },
-  [PATHS.LIST_USERS]: { expectedResponseBody: BODY_MOCKS.LIST_USERS, handler: ACTIONS.LIST_USERS },
-  [PATHS.GET_USER]: { expectedResponseBody: BODY_MOCKS.GET_USER, handler: ACTIONS.GET_USER },
-  [PATHS.GET_USER_PHOTO]: { expectedResponseBody: BODY_MOCKS.GET_USER_PHOTO, handler: ACTIONS.GET_USER_PHOTO },
-  [PATHS.NEW_USER]: { expectedResponseBody: BODY_MOCKS.NEW_USER, handler: ACTIONS.NEW_USER },
-  [PATHS.UPDATE_USER]: { expectedResponseBody: BODY_MOCKS.UPDATE_USER, handler: ACTIONS.UPDATE_USER },
-  [PATHS.DELETE_USER]: { expectedResponseBody: BODY_MOCKS.DELETE_USER, handler: ACTIONS.DELETE_USER },
-  [PATHS.LIST_CLIENTS]: { expectedResponseBody: BODY_MOCKS.LIST_CLIENTS, handler: ACTIONS.LIST_CLIENTS },
-  [PATHS.GET_CLIENT]: { expectedResponseBody: BODY_MOCKS.GET_CLIENT, handler: ACTIONS.GET_CLIENT },
-  [PATHS.NEW_CLIENT]: { expectedResponseBody: BODY_MOCKS.NEW_CLIENT, handler: ACTIONS.NEW_CLIENT },
-  [PATHS.GET_BILL]: { expectedResponseBody: BODY_MOCKS.GET_BILL, handler: ACTIONS.GET_BILL },
-  [PATHS.GET_BILLS]: { expectedResponseBody: BODY_MOCKS.GET_BILLS, handler: ACTIONS.GET_BILLS },
-};
+const PATH_DEFS_ENTRIES = Object.entries(PATHS_DEFS);
 
 const arrayOfUndefinedEndpoints = [
   'POST:::/',
@@ -109,35 +80,35 @@ const arrayOfUndefinedEndpoints = [
   'PUT:::/users/employees/employeeid/hours',
 ];
 
-const state = {
+const mockedState = {
   '/': {
-    [MethodSymbols.get]: ACTIONS.VERSION,
+    [MethodSymbols.get]: PATHS_DEFS.VERSION.handler,
     users: {
-      [MethodSymbols.get]: ACTIONS.LIST_USERS,
-      [MethodSymbols.post]: ACTIONS.NEW_USER,
-      [MethodSymbols.put]: ACTIONS.UPDATE_USER,
+      [MethodSymbols.get]: PATHS_DEFS.LIST_USERS.handler,
+      [MethodSymbols.post]: PATHS_DEFS.NEW_USER.handler,
+      [MethodSymbols.put]: PATHS_DEFS.UPDATE_USER.handler,
       'photo-:foo(\\d+).png': {
-        [MethodSymbols.get]: ACTIONS.GET_USER_PHOTO,
+        [MethodSymbols.get]: PATHS_DEFS.GET_USER_PHOTO.handler,
       },
       ':id': {
-        [MethodSymbols.get]: ACTIONS.GET_USER,
-        [MethodSymbols.delete]: ACTIONS.DELETE_USER,
+        [MethodSymbols.get]: PATHS_DEFS.GET_USER.handler,
+        [MethodSymbols.delete]: PATHS_DEFS.DELETE_USER.handler,
       },
       clients: {
-        [MethodSymbols.post]: ACTIONS.NEW_CLIENT,
-        [MethodSymbols.get]: ACTIONS.LIST_CLIENTS,
+        [MethodSymbols.post]: PATHS_DEFS.NEW_CLIENT.handler,
+        [MethodSymbols.get]: PATHS_DEFS.LIST_CLIENTS.handler,
         ':id': {
           bills: {
             ':id': {
-              [MethodSymbols.get]: ACTIONS.GET_BILL,
+              [MethodSymbols.get]: PATHS_DEFS.GET_BILL.handler,
             },
             ':from': {
               ':to': {
-                [MethodSymbols.get]: ACTIONS.GET_BILLS,
+                [MethodSymbols.get]: PATHS_DEFS.GET_BILLS.handler,
               },
             },
           },
-          [MethodSymbols.get]: ACTIONS.GET_CLIENT,
+          [MethodSymbols.get]: PATHS_DEFS.GET_CLIENT.handler,
         },
       },
     },
@@ -146,39 +117,66 @@ const state = {
 
 type HandlerType = () => { body: string };
 
-describe('list', () => {
-  const router = new RouterTree<HandlerType>(state);
+const initTest = () => {
+  PATH_DEFS_ENTRIES.forEach(([name, { handler }]) => {
+    handler.mockReturnValue({ body: name });
+  });
+};
 
-  const testPathsWithHandlers = ([path, { expectedResponseBody, handler: mockFunction }]) =>
-    it('Should return handler for ' + path, () => {
-      const handler = router.get(path);
-
-      expect(handler).toBeDefined();
-      expect(typeof handler).toEqual('function');
-      expect(handler).toBe(mockFunction);
-
-      const result = handler();
-      const { body } = result;
-      expect(expectedResponseBody).toEqual(body);
-
-      expect(mockFunction).toBeCalledTimes(1);
-    });
-
-  const testUndefinedPaths = (path) =>
+const testUndefinedPaths = (router) =>
+  arrayOfUndefinedEndpoints.forEach((path) => {
     it('Should not return handler for undefined path ' + path, () => {
       expect(router.get(path)).toEqual(undefined);
     });
+  });
 
-  arrayOfUndefinedEndpoints.forEach(testUndefinedPaths);
-  Object.entries(PATH_AND_ACTIONS).forEach(testPathsWithHandlers);
+describe('list', () => {
+  const router = new RouterTree<HandlerType>(mockedState);
+
+  beforeAll(initTest);
+
+  PATH_DEFS_ENTRIES.forEach(([name, { path, handler }]) => {
+    it('Should return handler for ' + path, () => {
+      const returnedHandler = router.get(path);
+
+      expect(returnedHandler).toBeDefined();
+      expect(typeof returnedHandler).toEqual('function');
+      expect(returnedHandler).toBe(handler);
+
+      const result = handler();
+      const { body } = result;
+      expect(body).toEqual(name);
+    });
+  });
+
+  testUndefinedPaths(router);
 });
 
-// describe('insert', () => {
-//   const router = new RouterTree<HandlerType>();
-//   it('Should save the path', () => {
-//     const handler = jest.fn();
-//     router.insert('GET:::/users/clients/:id/bills/:from/:to', handler);
+describe('insert', () => {
+  const router = new RouterTree<HandlerType>();
 
-//     const routeHandler = router.get()
-//   });
-// });
+  beforeAll(initTest);
+
+  PATH_DEFS_ENTRIES.forEach(([name, { path, handler, uri }]) => {
+    it(`Should save the path ${path} and return the handler`, () => {
+      handler.mockReturnValue({ body: name });
+      const value = router.insert(path, handler);
+      expect(value).toBe(handler);
+    });
+  });
+
+  PATH_DEFS_ENTRIES.forEach(([name, { uri, path }]) => {
+    it(`Should the uri ${uri}  get the handler for defined path: ${path}`, () => {
+      const handler = router.get(uri);
+      const result = handler();
+      expect(result).toBeDefined();
+      expect(result?.body).toEqual(name);
+    });
+  });
+
+  testUndefinedPaths(router);
+
+  it('Should the tree be equal to the expected tree root', () => {
+    expect(JSON.stringify(router.getRoot())).toEqual(JSON.stringify(mockedState['/']));
+  });
+});

@@ -169,18 +169,34 @@ export default class RouterTree<T> implements IDataStructure<T> {
     return handler;
   }
 
-  insertLeef(method: string, tree: TreeRoot<T>, currentToken: string, value: T): unknown {
-    tree[currentToken][MethodSymbols[method.toLowerCase()]] = value;
-    return tree;
-  }
-
   /**
    * Insert an element T at the given index
    * @param index IDataStructureIndexType index where the value will be stored
    * @param value
    */
   insert(index: string, value: T): T {
-    throw new Error('Method not implemented.');
+    const [method, fullPath] = index.split(RouterTree.SEPARATOR);
+    const tokens = fullPath.split('/').filter(Boolean);
+
+    let iToken = 0;
+    let partialTree: TreeRoot<T> = this.getRoot();
+
+    while (iToken < tokens.length) {
+      const token = tokens[iToken];
+      // default value
+      const currentTokenTree: TreeRoot<T> = partialTree[token] ?? {};
+      // initialize or set the current
+      partialTree[token] = currentTokenTree;
+      // Move the tree pointer
+      partialTree = currentTokenTree;
+      // move the index
+      iToken++;
+    }
+
+    // once we are at the leef, then add the method.
+    partialTree[MethodSymbols[method.toLowerCase()]] = value;
+
+    return value;
   }
 
   remove(index: IDataStructureRequiredIndexType): T {
