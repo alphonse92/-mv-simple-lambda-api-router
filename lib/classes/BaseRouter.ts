@@ -1,6 +1,6 @@
 import { NotImplementedYet, ServerError, isHttpError } from '../errors/http';
-import { RouterController, RouterHandlerType, RouterMapType } from '../types/TRouter';
-import RouterTree from './RouterTree';
+import { RouterController, RouterHandlerType } from '../types/TRouter';
+import RouterState from './RouterState';
 
 export enum EVENTS {
   ROUTE_PROCESSED = 'ROUTE_PROCESSED',
@@ -8,19 +8,23 @@ export enum EVENTS {
 }
 export type BaseRouterUseType<T> = RouterController<T>[] | RouterController<T>;
 export type ControllerLookupResponseType<T> = Promise<RouterHandlerType<T | void>>;
-export type EventListenerCallbackType<T> = (data: RouterMapType<T>, route?: RouterController<T>) => T | void;
-export type EventListenerType<T> = (event: EVENTS, data: RouterMapType<T>, route?: RouterController<T>) => void;
+export type EventListenerCallbackType<T> = (route?: RouterController<T>) => T | void;
+export type EventListenerType<T> = (event: EVENTS, route?: RouterController<T>) => void;
 export type HandlerByEventMapType<T> = { [event in EVENTS]?: EventListenerCallbackType<T> };
 
-export default abstract class BaseRouter<T> extends RouterTree<T> {
+export default abstract class BaseRouter<T> extends RouterState<T> {
   static separator = ':::';
 
-  protected map: RouterMapType<T> = {};
+  // protected map: RouterMapType<T> = {};
   protected __allRoutesLoaded = false;
   private __isExposed = false;
   private __totalOfRoutes = 0;
   private __routesProccesed = 0;
   private __eventListener: EventListenerType<T>;
+
+  constructor() {
+    super();
+  }
 
   /**
    * defined method to lookup for a resource controller. MUST be implemented
@@ -36,31 +40,31 @@ export default abstract class BaseRouter<T> extends RouterTree<T> {
     this.__eventListener = listenerHandler;
   }
 
-  private emit(type: EVENTS, data: RouterMapType<T>, route: RouterController<T>) {
+  private emit(type: EVENTS, route: RouterController<T>) {
     if (typeof this.__eventListener === 'function') {
-      this.__eventListener(type, data, route);
+      this.__eventListener(type, route);
     }
   }
 
-  private emitPartial(map: RouterMapType<T>, route: RouterController<T>) {
+  private emitPartial(route: RouterController<T>) {
     if (this.__routesProccesed === this.__totalOfRoutes && this.__isExposed) {
       this.__allRoutesLoaded = true;
-      this.emit(EVENTS.ALL_ROUTES_PROCESSED, this.map, route);
+      this.emit(EVENTS.ALL_ROUTES_PROCESSED, route);
       return;
     }
 
-    this.emit(EVENTS.ROUTE_PROCESSED, map, route);
+    this.emit(EVENTS.ROUTE_PROCESSED, route);
   }
 
   protected async lookupInCustomRouter(eventMapLookupController: HandlerByEventMapType<T>): Promise<T | void> {
     return new Promise((resolve, reject) => {
       // OVerriding custom event handlers callbacks to resolve/reject the promise
       const eventMapHandler: HandlerByEventMapType<T> = {
-        [EVENTS.ALL_ROUTES_PROCESSED]: (data: RouterMapType<T>) => {
+        [EVENTS.ALL_ROUTES_PROCESSED]: () => {
           // Router specific lookup function
           const customControllerLookup = eventMapLookupController[EVENTS.ALL_ROUTES_PROCESSED];
           // If exist then call it and resolve the promise
-          const controller = customControllerLookup(data);
+          const controller = customControllerLookup();
           if (customControllerLookup) resolve(controller);
           return controller;
         },
@@ -68,12 +72,12 @@ export default abstract class BaseRouter<T> extends RouterTree<T> {
       };
 
       // function that listen to changes in the router
-      const eventHandler = (event: EVENTS, data: RouterMapType<T>, route: RouterController<T>) => {
+      const eventHandler = (event: EVENTS, route: RouterController<T>) => {
         try {
           // take the proper handler from event
           const eventTypeHandler = eventMapHandler[event];
           // if it's configured the call it
-          if (eventTypeHandler) eventTypeHandler(data, route);
+          if (eventTypeHandler) eventTypeHandler(route);
         } catch (e) {
           reject(e);
         }
@@ -82,7 +86,7 @@ export default abstract class BaseRouter<T> extends RouterTree<T> {
       // If router is 100% loaded then get the event handler when the router has been finished
       if (this.__allRoutesLoaded) {
         const eventHandler = eventMapHandler[EVENTS.ALL_ROUTES_PROCESSED];
-        eventHandler(this.map);
+        eventHandler();
         return;
       }
 
@@ -102,9 +106,10 @@ export default abstract class BaseRouter<T> extends RouterTree<T> {
     setTimeout(() => {
       const fullRoute = { ...route, ...overrides };
       const mapKey = this.getMapKey({ ...fullRoute });
-      this.map[mapKey] = fullRoute.controller;
+
+      super.insert(mapKey, fullRoute.controller);
       this.__routesProccesed++;
-      this.emitPartial(this.map, fullRoute);
+      this.emitPartial(fullRoute);
     });
   }
 
@@ -133,8 +138,8 @@ export default abstract class BaseRouter<T> extends RouterTree<T> {
     }
   }
 
-  delete(awsPath: string): void {
-    delete this.map[awsPath];
+  delete(path: string): T {
+    return super.remove(path);
   }
 
   expose(): void {

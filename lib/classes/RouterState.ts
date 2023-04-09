@@ -55,22 +55,17 @@ export type RouterRoot<T> = {
   [RouterRootBase]: TreeRoot<T>;
 };
 
-const stateDefaultRoot = {
-  [RouterRootBase]: {},
-};
-
-export default class RouterTree<T> implements IDataStructure<T> {
+export default class RouterState<T> implements IDataStructure<T> {
   static SEPARATOR = ':::';
   private state: RouterRoot<T>;
 
-  constructor(initialState: RouterRoot<T> = stateDefaultRoot) {
+  constructor(initialState: RouterRoot<T> = { [RouterRootBase]: {} }) {
     this.state = initialState;
   }
 
   getRoot(): TreeRoot<T> {
     return this.state[RouterRootBase];
   }
-  z;
 
   getSymbolMethod(method: string) {
     const symbol = MethodSymbols[method.toLowerCase()];
@@ -158,7 +153,7 @@ export default class RouterTree<T> implements IDataStructure<T> {
    * @returns T
    */
   get(index: string): T | undefined {
-    const [method, fullPath] = index.split(RouterTree.SEPARATOR);
+    const [method, fullPath] = index.split(RouterState.SEPARATOR);
     const tokens = fullPath.split('/').filter(Boolean);
     const partialTree = this.search(tokens, this.getRoot());
 
@@ -175,7 +170,7 @@ export default class RouterTree<T> implements IDataStructure<T> {
    * @param value
    */
   insert(index: string, value: T): T {
-    const [method, fullPath] = index.split(RouterTree.SEPARATOR);
+    const [method, fullPath] = index.split(RouterState.SEPARATOR);
     const tokens = fullPath.split('/').filter(Boolean);
 
     let iToken = 0;
@@ -199,10 +194,12 @@ export default class RouterTree<T> implements IDataStructure<T> {
     return value;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   remove(index: IDataStructureRequiredIndexType): T {
     throw new Error('Method not implemented.');
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   update(index: IDataStructureRequiredIndexType): { new: T; old: T } {
     throw new Error('Method not implemented.');
   }

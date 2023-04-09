@@ -2,6 +2,6 @@ import BaseRouter from './BaseRouter';
 import AwsSamRouter from './AwsSamRouter';
 import AwsProxyRouter from './AwsProxyRouter';
 import ProxyRouter from './ProxyRouter';
-import RouterTree from './RouterTree';
+import RouterState from './RouterState';
 
-export { BaseRouter, AwsSamRouter, AwsProxyRouter, ProxyRouter, RouterTree };
+export { BaseRouter, AwsSamRouter, AwsProxyRouter, ProxyRouter, RouterState };

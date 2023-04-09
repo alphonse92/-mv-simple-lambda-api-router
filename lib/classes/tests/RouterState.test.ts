@@ -1,4 +1,4 @@
-import RouterTree, { MethodSymbols, TreeRoot } from '../RouterTree';
+import RouterState, { MethodSymbols, TreeRoot } from '../RouterState';
 
 const PATHS_DEFS = {
   VERSION: {
@@ -131,7 +131,7 @@ const testUndefinedPaths = (router) =>
   });
 
 describe('list', () => {
-  const router = new RouterTree<HandlerType>(mockedState);
+  const router = new RouterState<HandlerType>(mockedState);
 
   beforeAll(initTest);
 
@@ -153,7 +153,7 @@ describe('list', () => {
 });
 
 describe('insert', () => {
-  const router = new RouterTree<HandlerType>();
+  const router = new RouterState<HandlerType>();
 
   beforeAll(initTest);
 

@@ -1,6 +1,5 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { NotFoundError } from '../errors/http';
-import { RouterHandlerType, RouterMapType } from '../types/TRouter';
 import BaseRouter, { EVENTS } from './BaseRouter';
 
 export type controllerResultType = APIGatewayProxyResult;
@@ -8,16 +7,18 @@ export type HandlerResultType = Promise<controllerResultType>;
 export type HandlerType = (event: APIGatewayProxyEvent, context: Context) => HandlerResultType;
 
 export default class AwsSamRouter extends BaseRouter<HandlerType> {
-  _lookup(map: RouterMapType<HandlerType>, receivedMethod: string, receivedPath: string) {
+  constructor() {
+    super();
+  }
+
+  _lookup(receivedMethod: string, receivedPath: string) {
     const mapKey = this.getMapKey({ method: receivedMethod, path: receivedPath });
-    const controller: RouterHandlerType<HandlerType> = map?.[mapKey];
-    return controller;
+    return super.get(mapKey);
   }
 
   lookup(receivedMethod: string, receivedPath: string) {
     const eventMapHandler = {
-      [EVENTS.ALL_ROUTES_PROCESSED]: (data: RouterMapType<HandlerType>) =>
-        this._lookup(data, receivedMethod, receivedPath),
+      [EVENTS.ALL_ROUTES_PROCESSED]: () => this._lookup(receivedMethod, receivedPath),
     };
 
     return super.lookupInCustomRouter(eventMapHandler);
