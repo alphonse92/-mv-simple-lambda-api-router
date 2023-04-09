@@ -68,5 +68,8 @@ describe('BaseRouter.ts test', () => {
     });
   }
 
-  arrayOfRoutesPart2.slice(0, 100).forEach(test);
+  arrayOfRoutesPart2
+    .filter(({ path }) => hasPathArguments(path))
+    .slice(0, 100)
+    .forEach(test);
 });
