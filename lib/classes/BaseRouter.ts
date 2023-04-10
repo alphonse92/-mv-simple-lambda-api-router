@@ -64,15 +64,18 @@ export default abstract class BaseRouter<T> extends RouterState<T> {
           // Router specific lookup function
           const customControllerLookup = eventMapLookupController[EVENTS.ALL_ROUTES_PROCESSED];
           // If exist then call it and resolve the promise
-          const controller = customControllerLookup();
-          if (customControllerLookup) resolve(controller);
-          return controller;
+
+          if (customControllerLookup) {
+            const controller = customControllerLookup();
+            resolve(controller);
+            return controller;
+          }
         },
         [EVENTS.ROUTE_PROCESSED]: eventMapLookupController[EVENTS.ROUTE_PROCESSED],
       };
 
       // function that listen to changes in the router
-      const eventHandler = (event: EVENTS, route: RouterController<T>) => {
+      const listener = (event: EVENTS, route?: RouterController<T>) => {
         try {
           // take the proper handler from event
           const eventTypeHandler = eventMapHandler[event];
@@ -86,12 +89,12 @@ export default abstract class BaseRouter<T> extends RouterState<T> {
       // If router is 100% loaded then get the event handler when the router has been finished
       if (this.__allRoutesLoaded) {
         const eventHandler = eventMapHandler[EVENTS.ALL_ROUTES_PROCESSED];
-        eventHandler();
+        if (eventHandler) eventHandler();
         return;
       }
 
       // subscribe
-      this.addEventListener(eventHandler);
+      this.addEventListener(listener);
     });
   }
 
@@ -113,9 +116,10 @@ export default abstract class BaseRouter<T> extends RouterState<T> {
     });
   }
 
-  useAll(routes: RouterController<T>[], overrides: Partial<RouterController<T>> = {}) {
-    this.__totalOfRoutes += routes.length;
-    routes.map((route) => this.useController(route, overrides));
+  useAll(routes: BaseRouterUseType<T>, overrides: Partial<RouterController<T>> = {}) {
+    const arrayOfRoutes = Array.isArray(routes) ? routes : [routes];
+    this.__totalOfRoutes += arrayOfRoutes.length;
+    arrayOfRoutes.map((route) => this.useController(route, overrides));
   }
 
   /**
@@ -129,8 +133,9 @@ export default abstract class BaseRouter<T> extends RouterState<T> {
   use(...args: [string, BaseRouterUseType<T>] | [BaseRouterUseType<T> | any] | [BaseRouterUseType<T>[] | any]): void {
     if (typeof args[0] === 'string') {
       const [path, routeOrRoutes] = args;
-      const arrayOfRoutes = Array.isArray(routeOrRoutes) ? routeOrRoutes : [routeOrRoutes];
-      this.useAll(arrayOfRoutes, { path });
+      if (routeOrRoutes) {
+        this.useAll(routeOrRoutes, { path });
+      }
     } else if (Array.isArray(args[0])) {
       this.useAll(args[0]);
     } else {

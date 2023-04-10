@@ -1,5 +1,5 @@
 import { pathToRegexp } from 'path-to-regexp';
-import { IDataStructureRequiredIndexType } from 'types/DataStructures';
+import { IDataStructureRequiredIndexType } from '../types/DataStructures';
 import { IDataStructure } from '../interfaces/IDataStructure';
 
 export const RouterRootBase = '/';
@@ -48,7 +48,7 @@ export type IteratorResultType<T> = {
   tokens?: string[];
   currentToken?: string;
 };
-export type MatchSingleResultType<T> = { path: string; tree: TreeRoot<T> };
+export type MatchSingleResultType<T> = { path: string; tree?: TreeRoot<T> };
 export type MatchMultipleResults<T> = MatchSingleResultType<T>[];
 export type MatchResult<T> = MatchMultipleResults<T> | MatchSingleResultType<T> | undefined;
 export type RouterRoot<T> = {
@@ -72,11 +72,11 @@ export default class RouterState<T> implements IDataStructure<T> {
     return symbol;
   }
 
-  matchExact(token: string, tree: TreeRoot<T>): MatchSingleResultType<T> | undefined {
+  matchExact(token: string, tree: TreeRoot<T>): MatchSingleResultType<T> {
     // methods uses symbols to get the keys in the tree store
     // So we'll be safe if we receive a token with "get" or "post"
     const partialTree = tree[token];
-    return { path: token, tree: partialTree };
+    return { path: token, tree: partialTree as TreeRoot<T> };
   }
 
   /**
@@ -127,11 +127,13 @@ export default class RouterState<T> implements IDataStructure<T> {
       const { tree: leef } = arrayOfPartialTree[i];
 
       // Iterates in order
-      const value = this.iterate(restOfTokens ?? [], leef);
+      if (leef) {
+        const value = this.iterate(restOfTokens ?? [], leef);
 
-      // If it reaches the end, then return the value and stop.
-      if (value?.status === IteratorResultTypes.END) {
-        return value;
+        // If it reaches the end, then return the value and stop.
+        if (value?.status === IteratorResultTypes.END) {
+          return value;
+        }
       }
     }
 
@@ -179,7 +181,7 @@ export default class RouterState<T> implements IDataStructure<T> {
     while (iToken < tokens.length) {
       const token = tokens[iToken];
       // default value
-      const currentTokenTree: TreeRoot<T> = partialTree[token] ?? {};
+      const currentTokenTree: TreeRoot<T> = (partialTree[token] as TreeRoot<T>) ?? {};
       // initialize or set the current
       partialTree[token] = currentTokenTree;
       // Move the tree pointer
@@ -189,7 +191,7 @@ export default class RouterState<T> implements IDataStructure<T> {
     }
 
     // once we are at the leef, then add the method.
-    partialTree[MethodSymbols[method.toLowerCase()]] = value;
+    (partialTree as TreeNodeMethods<T>)[MethodSymbols[method.toLowerCase()]] = value;
 
     return value;
   }
