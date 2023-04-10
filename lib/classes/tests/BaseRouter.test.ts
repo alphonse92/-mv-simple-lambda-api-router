@@ -1,8 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { faker } from '@faker-js/faker';
-import shuffle from 'lodash/shuffle';
-import AwsProxyRouter, { HandlerResultType } from '../AwsProxyRouter';
-// import AwsSamRouter, { HandlerResultType } from '../AwsSamRouter';
+import AwsProxyRouter from '../AwsProxyRouter';
 import { Context, APIGatewayProxyEvent } from 'aws-lambda';
 
 const methods = ['post', 'get', 'put', 'delete'];
@@ -70,9 +68,8 @@ describe('BaseRouter.ts test', () => {
     });
   }
 
-  shuffle(arrayOfRoutesPart2.concat(arrayOfRoutesPart1))
-    .slice(0, 100)
+  arrayOfRoutesPart2
     .filter(({ path }) => hasPathArguments(path))
-    .slice(0, 1)
+    .slice(0, 100)
     .forEach(test);
 });

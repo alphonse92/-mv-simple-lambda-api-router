@@ -4,7 +4,7 @@ Simple and lightweight lambda api router.
 
 After version 1.2. the router initialization is asynchronous. Why? Async is better, async is love, you think in async and the day goes better, and you won't pay large AWS bills, why? because IT is async and you will use what you saved in bills for coffee or even better: PIZZA 🍕.
 
-This router is capable of managing 50K in less than 100 ms, I'm obsessed with the micro optimizations.
+This router can serve 50K routes in less than 50 ms and can resolve proxy paths in less than 20 ms.
 
 ![test result](https://raw.githubusercontent.com/alphonse92/-mv-simple-lambda-api-router/main/assets/stress_test_results.png)
 
@@ -323,3 +323,15 @@ export const lambdaHandler = router.expose();
 # Feedback
 
 I would appreciate any feedback you may have. If you encounter a bug or issue, please don't hesitate to post it in the GitHub repository. Additionally, you can reach me at my email address, alejandromover92@gmail.com, at any time.
+
+
+# Changelog
+
+
+## 1.4.0
+
+- Added a router state that implements an N-Tree to improve the resolving path time for proxy routers. For a router with 50K routes,  now it takes ~1 ms
+ in comparison with the last version that takes ~400ms
+## 1.3.0
+
+- The router send all the initialization stuff to the async stack. That makes the router to coldstart as soon as posible. 
