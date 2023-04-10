@@ -1,4 +1,4 @@
-# simple-lambda-api-router
+# simple-lambda-api-router 1.5.1
 
 Simple and lightweight lambda api router.
 
@@ -325,13 +325,9 @@ export const lambdaHandler = router.expose();
 I would appreciate any feedback you may have. If you encounter a bug or issue, please don't hesitate to post it in the GitHub repository. Additionally, you can reach me at my email address, alejandromover92@gmail.com, at any time.
 
 
-# Changelog
-
-
+# Changelo
 ## 1.4.0
-
 - Added a router state that implements an N-Tree to improve the resolving path time for proxy routers. For a router with 50K routes,  now it takes ~1 ms
  in comparison with the last version that takes ~400ms
-## 1.3.0
-
+ ## 1.3.0
 - The router send all the initialization stuff to the async stack. That makes the router to coldstart as soon as posible. 
