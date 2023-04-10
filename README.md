@@ -12,6 +12,8 @@ However, it won't save you of doing bad controllers. So please stay warm, drink 
 
 Happy Coding! 💻
 
+`There are many version of this because issues with the README.md for some reason its not being displayed. I highly recommend the last version that is the 1.5.x. Feel free to use the last one. `
+
 # Example Projects:
 
 Visit the examples to get started
@@ -324,11 +326,16 @@ export const lambdaHandler = router.expose();
 
 I would appreciate any feedback you may have. If you encounter a bug or issue, please don't hesitate to post it in the GitHub repository. Additionally, you can reach me at my email address, alejandromover92@gmail.com, at any time.
 
+# Changelog
 
-# Changelo
+## 1.5.x
 
+- Same of 1.4.x I had some troubles with the README. For some reason it's not being displayed properly in NPM. Im noob. Sorry.
 ## 1.4.0
-- Added a router state that implements an N-Tree to improve the resolving path time for proxy routers. For a router with 50K routes,  now it takes ~1 ms
- in comparison with the last version that takes ~400ms
+
+- Added a router state that implements an N-Tree to improve the resolving path time for proxy routers. For a router with 50K routes, now it takes ~1 ms
+  in comparison with the last version that takes ~400ms
+
 ## 1.3.0
-- The router send all the initialization stuff to the async stack. That makes the router to coldstart as soon as posible. 
+
+- The router send all the initialization stuff to the async stack. That makes the router to coldstart as soon as posible.
