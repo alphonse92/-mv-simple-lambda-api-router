@@ -4,7 +4,7 @@ Simple and lightweight lambda api router.
 
 After version 1.2. the router initialization is asynchronous. Why? Async is better, async is love, you think in async and the day goes better, and you won't pay large AWS bills, why? because IT is async and you will use what you saved in bills for coffee or even better: PIZZA 🍕.
 
-This is intended  to won't mess with your lambda coldstart. It's lightning-fast, even with 50K routes, it'll be ready to roll in less than ~50ms! And the best part? It can reach your routes in under ~2ms. 
+This is intended  to won't mess with your lambda coldstart. It's lightning-fast, even with 50K routes, it'll be ready to roll in less than 50ms! And the best part? It can reach your routes in under 2ms. 
 
 ![test result](https://raw.githubusercontent.com/alphonse92/-mv-simple-lambda-api-router/main/assets/stress_test_results.png)
 
