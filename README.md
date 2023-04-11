@@ -1,4 +1,7 @@
 # simple-lambda-api-router
+```
+From v 1.5.4 the package is the same. For some reason NPM is not publishing the readme I had to do some workarounds on it. 
+```
 
 Simple and lightweight lambda api router.
 
