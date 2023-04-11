@@ -1,4 +1,6 @@
-import RouterState, { MethodSymbols, TreeRoot } from '../RouterState';
+import RouterState, { MethodSymbols } from '../RouterState';
+
+const removeTrailingSlash = (path = '') => (path[path.length - 1] === '/' ? path.slice(0, path.length - 1) : path);
 
 const PATHS_DEFS = {
   VERSION: {
@@ -126,7 +128,9 @@ const initTest = () => {
 const testUndefinedPaths = (router) =>
   arrayOfUndefinedEndpoints.forEach((path) => {
     it('Should not return handler for undefined path ' + path, () => {
-      expect(router.get(path)).toEqual(undefined);
+      const [item, pathToItem] = router.getAndReturnPath(path);
+      expect(item).toEqual(undefined);
+      expect(pathToItem).toBeUndefined();
     });
   });
 
@@ -137,12 +141,12 @@ describe('list', () => {
 
   PATH_DEFS_ENTRIES.forEach(([name, { path, handler }]) => {
     it('Should return handler for ' + path, () => {
-      const returnedHandler = router.get(path);
+      const [returnedHandler, pathToItem] = router.getAndReturnPath(path);
 
       expect(returnedHandler).toBeDefined();
       expect(typeof returnedHandler).toEqual('function');
       expect(returnedHandler).toBe(handler);
-
+      expect(removeTrailingSlash(pathToItem)).toEqual(removeTrailingSlash(path.split(RouterState.SEPARATOR)[1]));
       const result = handler();
       const { body } = result;
       expect(body).toEqual(name);
@@ -167,10 +171,11 @@ describe('insert', () => {
 
   PATH_DEFS_ENTRIES.forEach(([name, { uri, path }]) => {
     it(`Should the uri ${uri}  get the handler for defined path: ${path}`, () => {
-      const handler = router.get(uri);
+      const [handler, pathToItem] = router.getAndReturnPath(uri);
       const result = handler();
       expect(result).toBeDefined();
       expect(result?.body).toEqual(name);
+      expect(removeTrailingSlash(pathToItem)).toEqual(removeTrailingSlash(path.split(RouterState.SEPARATOR)[1]));
     });
   });
 
