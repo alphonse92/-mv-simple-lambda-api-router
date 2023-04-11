@@ -48,7 +48,7 @@ export type IteratorResultType<T> = {
   tokens?: string[];
   currentToken?: string;
 };
-export type MatchSingleResultType<T> = { path: string; tree?: TreeRoot<T> };
+export type MatchSingleResultType<T> = { path: string; tree?: TreeRoot<T>; matchWith: string };
 export type MatchMultipleResults<T> = MatchSingleResultType<T>[];
 export type MatchResult<T> = MatchMultipleResults<T> | MatchSingleResultType<T> | undefined;
 export type RouterRoot<T> = {
@@ -58,6 +58,7 @@ export type RouterRoot<T> = {
 export default class RouterState<T> implements IDataStructure<T> {
   static SEPARATOR = ':::';
   private state: RouterRoot<T>;
+  private __last_path_visited__ = '';
 
   constructor(initialState: RouterRoot<T> = { [RouterRootBase]: {} }) {
     this.state = initialState;
@@ -76,7 +77,7 @@ export default class RouterState<T> implements IDataStructure<T> {
     // methods uses symbols to get the keys in the tree store
     // So we'll be safe if we receive a token with "get" or "post"
     const partialTree = tree[token];
-    return { path: token, tree: partialTree as TreeRoot<T> };
+    return { path: token, tree: partialTree as TreeRoot<T>, matchWith: token };
   }
 
   /**
@@ -90,7 +91,7 @@ export default class RouterState<T> implements IDataStructure<T> {
     return Object.entries(tree).reduce((acc, [path, leef]) => {
       const regexp = pathToRegexp(path);
       const result = regexp.exec(token);
-      if (result?.length) return [...acc, { path, tree: leef as TreeRoot<T> }];
+      if (result?.length) return [...acc, { path, tree: leef as TreeRoot<T>, matchWith: path }];
       return [...acc];
     }, [] as unknown as MatchMultipleResults<T>);
   }
@@ -103,50 +104,54 @@ export default class RouterState<T> implements IDataStructure<T> {
     return this.matchWith(token, tree);
   }
 
-  iterate(tokens: string[], tree: TreeRoot<T>): IteratorResultType<T> {
+  iterate(tokens: string[], tree: TreeRoot<T>, currentPath: string): [IteratorResultType<T>, string?] {
     const end = !Boolean(tokens.length);
 
     // Tokens is empty and there is not way to keep looping.
     // That means we found the path
     if (end) {
       // return the path
-      return { status: IteratorResultTypes.END, tree, tokens };
+      return [{ status: IteratorResultTypes.END, tree, tokens }, currentPath];
     }
 
     // Otherwise get the first token
     const [currentToken, ...restOfTokens] = tokens;
 
     // try to get the tree for a given token in the current state tree
-    const partialTree: MatchMultipleResults<T> = this.match(currentToken, tree);
+    const matchResults: MatchMultipleResults<T> = this.match(currentToken, tree);
 
     // Formalize to an array of results
-    const arrayOfPartialTree: MatchMultipleResults<T> = Array.isArray(partialTree) ? partialTree : [partialTree];
+    const arrayOfMatches: MatchMultipleResults<T> = Array.isArray(matchResults) ? matchResults : [matchResults];
 
     // A path may match with parameter paths. In any case it will be an array of matches. Then loop in-order
-    for (let i = 0; i < arrayOfPartialTree.length; i++) {
-      const { tree: leef } = arrayOfPartialTree[i];
+    for (let i = 0; i < arrayOfMatches.length; i++) {
+      const { tree: leef, matchWith } = arrayOfMatches[i];
 
       // Iterates in order
       if (leef) {
-        const value = this.iterate(restOfTokens ?? [], leef);
+        const [value, path] = this.iterate(restOfTokens ?? [], leef, `${currentPath}/${matchWith}`);
 
         // If it reaches the end, then return the value and stop.
+
         if (value?.status === IteratorResultTypes.END) {
-          return value;
+          return [value, path];
         }
       }
     }
 
     // default case: path was not found and return the last seen leef
-    return { status: IteratorResultTypes.NOT_FOUND, tree };
+    return [{ status: IteratorResultTypes.NOT_FOUND, tree }];
   }
 
   search(tokens: string[], tree: TreeRoot<T>): TreeRoot<T> | undefined {
-    const result = this.iterate(tokens, tree);
+    const [result, path] = this.iterate(tokens, tree, '');
 
     if (result?.status === IteratorResultTypes.END) {
+      this.__last_path_visited__ = path;
       return result.tree;
     }
+
+    this.__last_path_visited__ = '';
   }
 
   /**
@@ -164,6 +169,19 @@ export default class RouterState<T> implements IDataStructure<T> {
     const symbol = this.getSymbolMethod(method);
     const handler = partialTree[symbol] as T;
     return handler;
+  }
+
+  /**
+   * This function does the same that get, butit also returns the path of the item in the tree. Useful to get
+   * the proxy path it matches with. Note the path does not contain the trailing slash
+   * @param index
+   * @returns [T,string] where T is the handler, and the string is the path that points to handler in the treee
+   */
+  getAndReturnPath(index: string): [T, string | undefined] {
+    const item = this.get(index);
+    const pathToItem = this.__last_path_visited__?.length ? this.__last_path_visited__ : undefined;
+
+    return [item, item ? pathToItem : undefined];
   }
 
   /**
