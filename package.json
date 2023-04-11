@@ -3,11 +3,12 @@
   "author": "Eliecer Alejandro Molina Vergel",
   "description": "Simple and lightweight lambda api router.",
   "license": "ISC",
-  "version": "1.5.5",
+  "version": "1.5.6",
   "repository": {
     "type": "git",
     "url": "https://github.com/alphonse92/-mv-simple-lambda-api-router"
   },
+  "readme": "README.md",
   "homepage": "https://github.com/alphonse92/-mv-simple-lambda-api-router/blob/main/README.md",
   "keywords": [
     "aws sam",
