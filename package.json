@@ -8,6 +8,7 @@
     "type": "git",
     "url": "https://github.com/alphonse92/-mv-simple-lambda-api-router"
   },
+  "homepage": "https://github.com/alphonse92/-mv-simple-lambda-api-router/blob/main/README.md",
   "keywords": [
     "aws sam",
     "aws",
