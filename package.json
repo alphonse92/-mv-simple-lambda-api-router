@@ -32,6 +32,7 @@
     "test:modules": "npm run test:commonjs && npm run test:tsmodule",
     "test:commonjs": "npx jest --testMatch \"$(pwd)/commonjs.test.js\"",
     "test:tsmodule": "npx jest --testMatch \"$(pwd)/tsmodule.test.ts\"",
+    "prepublish:npm": "npm run compile",
     "publish:npm": "npm run compile && npm run test:modules && npm publish",
     "publish:npm:patch": "npm run compile && npm run test:modules && npm version patch && npm publish",
     "publish:npm:minor": "npm run compile && npm run test:modules && npm version minor && npm publish",
