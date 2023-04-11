@@ -326,7 +326,7 @@ export const lambdaHandler = router.expose();
 
 I would appreciate any feedback you may have. If you encounter a bug or issue, please don't hesitate to post it in the GitHub repository. Additionally, you can reach me at my email address, alejandromover92@gmail.com, at any time.
 
-# Changelog
+# Changelog
 
 ## 1.5.x
 
