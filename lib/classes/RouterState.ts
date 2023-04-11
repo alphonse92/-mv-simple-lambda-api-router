@@ -54,6 +54,7 @@ export type MatchResult<T> = MatchMultipleResults<T> | MatchSingleResultType<T> 
 export type RouterRoot<T> = {
   [RouterRootBase]: TreeRoot<T>;
 };
+export type ItemAndPathType<T> = [T, string | undefined];
 
 export default class RouterState<T> implements IDataStructure<T> {
   static SEPARATOR = ':::';
@@ -177,7 +178,7 @@ export default class RouterState<T> implements IDataStructure<T> {
    * @param index
    * @returns [T,string] where T is the handler, and the string is the path that points to handler in the treee
    */
-  getAndReturnPath(index: string): [T, string | undefined] {
+  getAndReturnPath(index: string): ItemAndPathType<T> {
     const item = this.get(index);
     const pathToItem = this.__last_path_visited__?.length ? this.__last_path_visited__ : undefined;
 

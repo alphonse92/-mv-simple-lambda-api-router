@@ -58,13 +58,28 @@ describe('BaseRouter.ts test', () => {
     it(`Check if path ${method} ${path} is available`, async () => {
       const hasArgumentPath = hasPathArguments(path);
       const pathWithArgs = hasArgumentPath ? `${path.replace('/:id', '/id')}` : path;
-      const result = await handler({ path: pathWithArgs, httpMethod: method } as APIGatewayProxyEvent, {} as Context);
+      const result = await handler(
+        { path: `/${pathWithArgs}`, httpMethod: method } as APIGatewayProxyEvent,
+        {} as Context,
+      );
 
       const { statusCode, body } = result;
 
+      const mockController = controller as jest.Mock;
+
       expect(body).toEqual(path);
       expect(statusCode).toEqual(200);
-      expect(controller).toBeCalledTimes(1);
+      expect(mockController).toBeCalledTimes(1);
+      expect(mockController).toHaveBeenCalledWith(
+        expect.objectContaining({
+          httpMethod: method,
+          path: `/${pathWithArgs}`,
+          pathParameters: {
+            id: 'id',
+          },
+        }),
+        expect.objectContaining({}),
+      );
     });
   }
 

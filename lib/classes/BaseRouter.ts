@@ -1,6 +1,6 @@
 import { NotImplementedYet, ServerError, isHttpError } from '../errors/http';
 import { RouterController, RouterHandlerType } from '../types/TRouter';
-import RouterState from './RouterState';
+import RouterState, { ItemAndPathType } from './RouterState';
 
 export enum EVENTS {
   ROUTE_PROCESSED = 'ROUTE_PROCESSED',
@@ -8,7 +8,7 @@ export enum EVENTS {
 }
 export type BaseRouterUseType<T> = RouterController<T>[] | RouterController<T>;
 export type ControllerLookupResponseType<T> = Promise<RouterHandlerType<T | void>>;
-export type EventListenerCallbackType<T> = (route?: RouterController<T>) => T | void;
+export type EventListenerCallbackType<T> = (route?: RouterController<T>) => ItemAndPathType<T>;
 export type EventListenerType<T> = (event: EVENTS, route?: RouterController<T>) => void;
 export type HandlerByEventMapType<T> = { [event in EVENTS]?: EventListenerCallbackType<T> };
 
@@ -24,16 +24,6 @@ export default abstract class BaseRouter<T> extends RouterState<T> {
 
   constructor() {
     super();
-  }
-
-  /**
-   * defined method to lookup for a resource controller. MUST be implemented
-   * @param receivedMethod
-   * @param receivedPath
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected lookup(receivedMethod: string, receivedPath: string): ControllerLookupResponseType<T> {
-    throw NotImplementedYet;
   }
 
   protected addEventListener(listenerHandler: EventListenerType<T>) {
@@ -56,9 +46,40 @@ export default abstract class BaseRouter<T> extends RouterState<T> {
     this.emit(EVENTS.ROUTE_PROCESSED, route);
   }
 
-  protected async lookupInCustomRouter(eventMapLookupController: HandlerByEventMapType<T>): Promise<T | void> {
+  /**
+   * Function that receives a method and path to find a controller that match with
+   * @param method method as string
+   * @param path url as string
+   * @returns
+   */
+  protected lookup(method: string, path: string): Promise<ItemAndPathType<T>> {
+    //  Handler that will be executed when all routers are loaded (processd)
+    const allRoutesProcessedEventHandler = () => {
+      const mapKey = this.getMapKey({ method, path });
+      return this.getAndReturnPath(mapKey);
+    };
+
+    const eventMapHandler: HandlerByEventMapType<T> = {
+      [EVENTS.ALL_ROUTES_PROCESSED]: allRoutesProcessedEventHandler,
+      // [EVENTS.ROUTE_PROCESSED]: (data: RouterMapType<T>, route: RouterController<T>) => true,
+    };
+
+    return this.waitAndLookupController(eventMapHandler);
+  }
+
+  /**
+   * This function will try to return the function handler for a given route.
+   * Due it's async it receives a map that maps the BaseRouter events with the Router that extends this class.
+   *
+   * With that, this function returns a promise to let the custom router know when a path was loaded
+   * @param eventMapLookupController Map of event controllers that will be triggered once an event occurs.
+   * @returns
+   */
+  protected async waitAndLookupController(
+    eventMapLookupController: HandlerByEventMapType<T>,
+  ): Promise<ItemAndPathType<T>> {
     return new Promise((resolve, reject) => {
-      // OVerriding custom event handlers callbacks to resolve/reject the promise
+      // Overrides the custom event handlers callbacks to resolve/reject the promise
       const eventMapHandler: HandlerByEventMapType<T> = {
         [EVENTS.ALL_ROUTES_PROCESSED]: () => {
           // Router specific lookup function
@@ -74,7 +95,7 @@ export default abstract class BaseRouter<T> extends RouterState<T> {
         [EVENTS.ROUTE_PROCESSED]: eventMapLookupController[EVENTS.ROUTE_PROCESSED],
       };
 
-      // function that listen to changes in the router
+      // Function that add the function event listener that dispatch the promise.
       const listener = (event: EVENTS, route?: RouterController<T>) => {
         try {
           // take the proper handler from event
