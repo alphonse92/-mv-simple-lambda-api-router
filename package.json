@@ -22,7 +22,10 @@
     "node js"
   ],
   "files": [
-    "dist/*"
+    "dist/*",
+    "CHANGELOG.md",
+    "README.md",
+    "LICENSE"
   ],
   "main": "dist/index.js",
   "scripts": {
