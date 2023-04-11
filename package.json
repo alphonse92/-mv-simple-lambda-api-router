@@ -3,7 +3,7 @@
   "author": "Eliecer Alejandro Molina Vergel",
   "description": "Simple and lightweight lambda api router.",
   "license": "ISC",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "repository": {
     "type": "git",
     "url": "https://github.com/alphonse92/-mv-simple-lambda-api-router"
@@ -30,8 +30,9 @@
     "compile:clear": "rm -rf dist",
     "test": "jest",
     "test:modules": "npm run test:commonjs && npm run test:tsmodule",
-    "test:commonjs": "npx jest --testMatch \"$(pwd)/commonjs.test.js\"",
-    "test:tsmodule": "npx jest --testMatch \"$(pwd)/tsmodule.test.ts\"",
+    "test:commonjs": "npx jest --testMatch \"$(pwd)/commonjs.test.js\" --collectCoverage=false",
+    "test:tsmodule": "npx jest --testMatch \"$(pwd)/tsmodule.test.ts\" --collectCoverage=false",
+    "prepublish:npm": "npm run compile",
     "publish:npm": "npm run compile && npm run test:modules && npm publish",
     "publish:npm:patch": "npm run compile && npm run test:modules && npm version patch && npm publish",
     "publish:npm:minor": "npm run compile && npm run test:modules && npm version minor && npm publish",

@@ -11,28 +11,15 @@ export default class AwsSamRouter extends BaseRouter<HandlerType> {
     super();
   }
 
-  _lookup(receivedMethod: string, receivedPath: string) {
-    const mapKey = this.getMapKey({ method: receivedMethod, path: receivedPath });
-    return super.get(mapKey);
-  }
-
-  lookup(receivedMethod: string, receivedPath: string) {
-    const eventMapHandler = {
-      [EVENTS.ALL_ROUTES_PROCESSED]: () => this._lookup(receivedMethod, receivedPath),
-    };
-
-    return super.lookupInCustomRouter(eventMapHandler);
-  }
-
   expose(): HandlerType {
     super.expose();
-    return async (event: APIGatewayProxyEvent, context: Context): Promise<APIGatewayProxyResult> => {
+    return async (event: APIGatewayProxyEvent, context: Context, ...restArgs): Promise<APIGatewayProxyResult> => {
       try {
         const { resource, httpMethod } = event;
 
-        const controller = await this.lookup(httpMethod, resource);
+        const [controller] = await this.lookup(httpMethod, resource);
         if (typeof controller === 'function') {
-          return controller(event, context);
+          return controller(event, context, ...restArgs);
         }
 
         throw NotFoundError;
