@@ -1,47 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { faker } from '@faker-js/faker';
 import AwsProxyRouter from '../AwsProxyRouter';
 import { Context, APIGatewayProxyEvent } from 'aws-lambda';
-
-const methods = ['post', 'get', 'put', 'delete'];
-const hasPathArguments = (path) => path.includes(':');
-const getRandomPath = () => `${faker.random.alphaNumeric(10)}${faker.datatype.boolean() ? '/:id' : ''}`;
-const getRandomMethod = () => methods[faker.datatype.number({ min: 0, max: methods.length - 1 })];
-const getEmptyArray = (length) => Array.from(new Array(length));
-const getArrayOfPaths = (length) => getEmptyArray(length).map(getRandomPath);
-const getArrayOfRoutes = (paths) =>
-  paths.map((path) => ({
-    controller: jest.fn().mockResolvedValue({ statusCode: 200, body: path }),
-    method: getRandomMethod(),
-    path,
-  }));
-
-const length = 50000;
-
-console.log(`Creating array of ${length} routes`);
-
-const arrayOfRoutes = getArrayOfRoutes(getArrayOfPaths(length));
-const start = 0;
-const mid = arrayOfRoutes.length / 2;
-const end = arrayOfRoutes.length - 1;
-const arrayOfRoutesPart1 = arrayOfRoutes.slice(start, mid);
-const arrayOfRoutesPart2 = arrayOfRoutes.slice(mid + 1, end);
-
-console.log(
-  'Array of routes created. First array len',
-  arrayOfRoutesPart1.length,
-  'second array len',
-  arrayOfRoutesPart2.length,
-  'total',
-  arrayOfRoutesPart1.length + arrayOfRoutesPart2.length,
-);
+import { arrayOfRoutes, arrayOfRoutesPart1, arrayOfRoutesPart2 } from './mocks/routes.mocks';
 
 describe('BaseRouter.ts test', () => {
   let handler, totalTime;
 
   it('Should add 50K routes in less than 100 ms', () => {
     const router = new AwsProxyRouter();
-
     const startTime = performance.now();
     router.use(arrayOfRoutesPart1);
     router.use(arrayOfRoutesPart2);
@@ -54,37 +20,22 @@ describe('BaseRouter.ts test', () => {
   }, 100);
 
   function test(route) {
-    const { controller, path, method } = route;
-    it(`Check if path ${method} ${path} is available`, async () => {
-      const hasArgumentPath = hasPathArguments(path);
-      const pathWithArgs = hasArgumentPath ? `${path.replace('/:id', '/id')}` : path;
-      const result = await handler(
-        { path: `/${pathWithArgs}`, httpMethod: method } as APIGatewayProxyEvent,
-        {} as Context,
-      );
+    const { controller, path, method, tests } = route;
 
-      const { statusCode, body } = result;
-
-      const mockController = controller as jest.Mock;
-
-      expect(body).toEqual(path);
-      expect(statusCode).toEqual(200);
-      expect(mockController).toBeCalledTimes(1);
-      expect(mockController).toHaveBeenCalledWith(
-        expect.objectContaining({
-          httpMethod: method,
-          path: `/${pathWithArgs}`,
-          pathParameters: {
-            id: 'id',
-          },
-        }),
-        expect.objectContaining({}),
-      );
-    });
+    for (const pathTest of tests) {
+      it(`Check if path ${method} ${pathTest} is available.`, async () => {
+        const mockController = controller as jest.Mock;
+        const result = await handler({ path: pathTest, httpMethod: method } as APIGatewayProxyEvent, {} as Context);
+        const { statusCode, body } = result;
+        expect(body).toEqual(path);
+        expect(statusCode).toEqual(200);
+        expect(mockController).toBeCalledTimes(1);
+      });
+    }
   }
 
   arrayOfRoutesPart2
-    .filter(({ path }) => hasPathArguments(path))
+    .filter(({ tests }) => Boolean(tests.length))
     .slice(0, 100)
     .forEach(test);
 });

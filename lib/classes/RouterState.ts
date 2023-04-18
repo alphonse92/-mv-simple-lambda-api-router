@@ -86,7 +86,9 @@ export default class RouterState<T> implements IDataStructure<T> {
   match(token: string, tree: TreeRoot<T>): MatchMultipleResults<T> {
     const result: MatchResult<T> = this.matchExact(token, tree);
 
-    if (result?.tree) return [result];
+    if (result?.tree) {
+      return [result];
+    }
 
     return this.matchWith(token, tree);
   }
