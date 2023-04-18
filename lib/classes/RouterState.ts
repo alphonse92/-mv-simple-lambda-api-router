@@ -1,35 +1,21 @@
+import http from 'http';
 import { pathToRegexp } from 'path-to-regexp';
 import { IDataStructureRequiredIndexType } from '../types/DataStructures';
 import { IDataStructure } from '../interfaces/IDataStructure';
 
 export const RouterRootBase = '/';
 
-export enum METHODS {
-  connect = 'connect',
-  delete = 'delete',
-  get = 'get',
-  head = 'head',
-  options = 'options',
-  post = 'post',
-  put = 'put',
-  patch = 'patch',
-  trace = 'trace',
+export const METHODS: { [method: string]: string } = {};
+export const MethodSymbols: { [method: string]: symbol } = {};
+
+for (const method of http.METHODS) {
+  const lower = method.toLowerCase();
+  METHODS[lower] = lower;
+  MethodSymbols[lower] = Symbol(lower);
 }
 
-export const MethodSymbols = {
-  [METHODS.connect]: Symbol('connect'),
-  [METHODS.delete]: Symbol('delete'),
-  [METHODS.get]: Symbol('get'),
-  [METHODS.head]: Symbol('head'),
-  [METHODS.options]: Symbol('options'),
-  [METHODS.post]: Symbol('post'),
-  [METHODS.put]: Symbol('put'),
-  [METHODS.patch]: Symbol('patch'),
-  [METHODS.trace]: Symbol('trace'),
-};
-
 export type TreeNodeMethods<T> = {
-  [method in METHODS]?: T;
+  [method: symbol]: T;
 };
 
 export type ControllerMethods<T> = TreeNodeMethods<T>;
@@ -100,7 +86,9 @@ export default class RouterState<T> implements IDataStructure<T> {
   match(token: string, tree: TreeRoot<T>): MatchMultipleResults<T> {
     const result: MatchResult<T> = this.matchExact(token, tree);
 
-    if (result?.tree) return [result];
+    if (result?.tree) {
+      return [result];
+    }
 
     return this.matchWith(token, tree);
   }
