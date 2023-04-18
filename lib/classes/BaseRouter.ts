@@ -1,4 +1,4 @@
-import { NotImplementedYet, ServerError, isHttpError } from '../errors/http';
+import { ServerError, isHttpError } from '../errors/http';
 import { RouterController, RouterHandlerType } from '../types/TRouter';
 import RouterState, { ItemAndPathType } from './RouterState';
 

@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, Context } from 'aws-lambda';
 import { NotFoundError } from '../errors/http';
-import BaseRouter, { EVENTS } from './BaseRouter';
+import BaseRouter from './BaseRouter';
 
 export type controllerResultType = APIGatewayProxyResult;
 export type HandlerResultType = Promise<controllerResultType>;
