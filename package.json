@@ -35,6 +35,7 @@
     "compile:clear": "rm -rf dist",
     "utils:create:mocks": "mkdir -p ./mocks && MOCK_FOLDER=./mocks/paths.json node compilePaths.js",
     "test": "jest --testMatch \"$(pwd)/lib/**/*.test.ts\"",
+    "test:performance": "rm -rf jest-router-performance-test-results.txt && npx jest BaseRouter.test.ts --no-color 2>jest-router-performance-test-results.txt",
     "test:modules": "npm run test:commonjs && npm run test:tsmodule",
     "test:commonjs": "npx jest --testMatch \"$(pwd)/commonjs.test.js\" --collectCoverage=false",
     "test:tsmodule": "npx jest --testMatch \"$(pwd)/tsmodule.test.ts\" --collectCoverage=false",
