@@ -1,19 +1,17 @@
 # simple-lambda-api-router
-```
-From v 1.5.4 the package is the same. For some reason NPM is not publishing the readme I had to do some workarounds on it. 
-```
 
 Simple and lightweight lambda api router.
 
 After version 1.2. the router initialization is asynchronous. Why? Async is better, async is love, you think in async and the day goes better, and you won't pay large AWS bills, why? because IT is async and you will use what you saved in bills for coffee or even better: PIZZA 🍕.
 
-This is intended  to won't mess with your lambda coldstart. It's lightning-fast, even with 50K routes, it'll be ready to roll in less than 50ms! And the best part? It can reach your routes in under 2ms. 
+This is intended  to won't mess with your lambda coldstart. It's lightning-fast, even with 50K routes, it'll be ready to roll in less than 50ms! And the best part? It can reach your routes in under 2ms. See the performance report [here](https://github.com/alphonse92/-mv-simple-lambda-api-router/blob/main/jest-router-performance-test-results.txt)
 
-![test result](https://raw.githubusercontent.com/alphonse92/-mv-simple-lambda-api-router/main/assets/stress_test_results.png)
 
 However, it won't save you of doing bad controllers. So please stay warm, drink water and do exercise.
 
 Happy Coding! 💻
+
+
 
 # Example Projects:
 
